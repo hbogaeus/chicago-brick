@@ -14,12 +14,11 @@ limitations under the License.
 ==============================================================================*/
 
 define(function(require) {
-  'use strict';
-  var Surface = require('client/surface/surface');
+  const Surface = require('client/surface/surface');
 
-  var CanvasSurface = function(container, wallGeometry) {
+  const CanvasSurface = function(container, wallGeometry) {
     Surface.call(this, container, wallGeometry);
-    
+
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
     this.canvas.style.left = 0;
@@ -31,11 +30,11 @@ define(function(require) {
 
     this.canvas.setAttribute('width', this.virtualRect.w);
     this.canvas.setAttribute('height', this.virtualRect.h);
-    
+
     container.appendChild(this.canvas);
-    
+
     this.context = this.canvas.getContext('2d');
-    
+
   };
   CanvasSurface.prototype = Object.create(Surface.prototype);
 
@@ -48,7 +47,7 @@ define(function(require) {
     this.context.save();
     this.applyOffset();
   };
-  
+
   CanvasSurface.prototype.applyOffset = function() {
     this.context.translate(-this.virtualRect.x, -this.virtualRect.y);
   };

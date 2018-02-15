@@ -14,11 +14,10 @@ limitations under the License.
 ==============================================================================*/
 
 define(function(require) {
-  'use strict';
-  var Surface = require('client/surface/surface');
-  var THREE = require('three');
+  const Surface = require('client/surface/surface');
+  const THREE = require('three');
 
-  var ThreeJsSurface = function(container, wallGeometry, properties) {
+  const ThreeJsSurface = function(container, wallGeometry, properties) {
     Surface.call(this, container, wallGeometry);
     this.renderer = new THREE.WebGLRenderer(properties);
     this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight);
@@ -35,7 +34,7 @@ define(function(require) {
   ThreeJsSurface.prototype = Object.create(Surface.prototype);
 
   ThreeJsSurface.prototype.setTileViewOffsetForCamera = function(camera) {
-    var cam = camera || this.camera;
+    const cam = camera || this.camera;
     cam.setViewOffset(
         this.wallRect.w, this.wallRect.h,
         this.virtualRect.x, this.virtualRect.y,

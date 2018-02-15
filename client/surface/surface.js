@@ -14,14 +14,13 @@ limitations under the License.
 ==============================================================================*/
 
 define(function(require) {
-  'use strict';
-  var Rectangle = require('lib/rectangle');
-  var geometry = require('lib/geometry');
-  var info = require('client/util/info');
+  const Rectangle = require('lib/rectangle');
+  const geometry = require('lib/geometry');
+  const info = require('client/util/info');
 
   // Installs a surface in the given container & readies the surface for
   // drawing.
-  var Surface = function Surface(container, wallGeometry) {
+  const Surface = function Surface(container, wallGeometry) {
     this.container = container;
 
     this.wallGeometry = wallGeometry;
@@ -57,11 +56,11 @@ define(function(require) {
     y = (y+0.5) * this.virtualRect.h;
     return geometry.isInsideRect(this.wallRect, x, y);
   };
-  
+
   Surface.prototype.wallExtentLineTest = function(ax, ay, bx, by) {
     return geometry.intersectPolygonLine(this.wallGeometry, ax, ay, bx, by);
   };
-  
+
   // Destroys a surface.
   Surface.prototype.destroy = function() {};
   // Returns the visible rect of the surface, anchored at 0,0

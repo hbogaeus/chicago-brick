@@ -14,16 +14,15 @@ limitations under the License.
 ==============================================================================*/
 
 define(function(require) {
-  'use strict';
   require('p5.dom');
-  var Surface = require('client/surface/surface');
-  var P5 = require('p5');
+  const Surface = require('client/surface/surface');
+  const P5 = require('p5');
 
   // Sets up the sizes and scaling factors. The P5 library will take care of creating a canvas.
   // sketch is the actual p5.js code that will be executed.  sketch.setup() will be called at
   // the end of the wall-provided setup() method and draw() will be invoked as well.
   // sketchArgs will be passed along to the constructor call on providedSketchClass.
-  var P5Surface = function(container, wallGeometry, providedSketchClass, startTime, sketchConstructorArgs) {
+  const P5Surface = function(container, wallGeometry, providedSketchClass, startTime, sketchConstructorArgs) {
     Surface.call(this, container, wallGeometry);
     this.realPixelScalingFactors = {
       x : this.container.offsetWidth / this.virtualRect.w,
@@ -31,26 +30,26 @@ define(function(require) {
     };
 
     this.startTime = startTime;
-    var randomSeed = this.startTime || 0;
+    const randomSeed = this.startTime || 0;
 
-    var processing_canvas_width = this.container.offsetWidth;
-    var processing_canvas_height = this.container.offsetHeight;
+    const processing_canvas_width = this.container.offsetWidth;
+    const processing_canvas_height = this.container.offsetHeight;
 
-    var xScale = this.realPixelScalingFactors.x;
-    var yScale = this.realPixelScalingFactors.y;
+    const xScale = this.realPixelScalingFactors.x;
+    const yScale = this.realPixelScalingFactors.y;
 
-    var wallWidth = this.wallRect.w;
-    var wallHeight = this.wallRect.h;
+    const wallWidth = this.wallRect.w;
+    const wallHeight = this.wallRect.h;
 
-    var xOffset = this.virtualRect.x;
-    var yOffset = this.virtualRect.y;
+    const xOffset = this.virtualRect.x;
+    const yOffset = this.virtualRect.y;
 
     this.sketch = null;
 
-    var surface = this;
+    const surface = this;
 
     // p5 must be a P5.js instance.  new P5(...) below takes care of this.
-    var scaffolding = function(p5) {
+    const scaffolding = function(p5) {
       surface.sketch = new providedSketchClass(p5, surface, sketchConstructorArgs);
 
       p5.wallWidth = wallWidth;
@@ -60,7 +59,7 @@ define(function(require) {
         if (typeof(surface.sketch.preload) == "function") {
           surface.sketch.preload(p5);
         }
-      }
+      };
 
       p5.setup = function() {
         // Videowall required setup.
