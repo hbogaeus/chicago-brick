@@ -3,6 +3,8 @@
   "browser": true,
   "strict": true,
   "-W097": false,
+  "esversion":6,
+  "esnext": false,
   "globals": {
     "console": false,
     "define": false,
