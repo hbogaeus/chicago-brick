@@ -32,7 +32,7 @@ const DEFAULT_SCREEN_HEIGHT = DEFAULT_SCREEN_WIDTH * 1080/1920;
 
 // Stolen from util/location.js.
 function getUriParams() {
-  return location.search.substr(1).split(/&/g).reduce(function(obj, pair) {
+  return location.search.substr(1).split(/&/g).reduce((obj, pair) => {
     var bits = pair.split('=');
     var key = bits.shift();
     obj[key] = decodeURIComponent(bits.join('='));
