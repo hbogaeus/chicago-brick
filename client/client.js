@@ -13,13 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
-  
-  var network = require('client/network/network');
-  var ModuleManager = require('client/modules/module_manager');
-  var debug = require('client/util/debug');
-  var info = require('client/util/info');
+
+  const network = require('client/network/network');
+  const ModuleManager = require('client/modules/module_manager');
+  const debug = require('client/util/debug');
+  const info = require('client/util/info');
   const monitor = require('client/monitoring/monitor');
   const location = require('client/util/location');
 
@@ -33,6 +33,6 @@ define(function(require) {
   }
 
   // Ready to receive some code!
-  var manager = new ModuleManager;
+  var manager = new ModuleManager();
   manager.start();
 });
