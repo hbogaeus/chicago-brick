@@ -13,14 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(require => {
-  "use strict";
-
-  const parsedLocation = require('client/util/location');
+define((require) => {
+  var parsedLocation = require('client/util/location');
 
   const LOCAL_ASSET_PATH = 'http://127.0.0.1:8080/';
 
-  return name => {
+  return (name) => {
     if (parsedLocation.useLocalAssets) {
       return `${LOCAL_ASSET_PATH}${name}`;
     }
