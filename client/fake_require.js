@@ -64,7 +64,7 @@ define((require) => {
           // format. This is handled specially in webapp.js.
           let rewrittenDeps = deps.map((d) => {
             if (d.substring(0, 2) == './') {
-              return 'module/' + moduleName + d.substring(1);
+              return `module/${moduleName}${d.substring(1)}`;
             } else {
               return d;
             }
