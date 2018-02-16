@@ -39,13 +39,13 @@ limitations under the License.
 //    context.
 //  - Finally, we have to clean up these contexts, so they don't just occupy
 //    all memory forever.
-define(function(require) {
+define((require) => {
   'use strict';
   const _ = require('underscore');
 
   /* globals requirejs */
   return {
-    createEnvironment: function(name, moduleName, env) {
+    createEnvironment: (name, moduleName, env) => {
       return new Promise((resolve) => {
         // First, create a custom requirejs context. Note that we use the
         // global requirejs, and not the 'local' require, as they are, in
@@ -59,7 +59,7 @@ define(function(require) {
         };
 
         let baseRequire = requirejs.config(config);
-        let contextRequire = function(deps, callback, errback) {
+        let contextRequire = (deps, callback, errback) => {
           // Rewrite module-relative deps to the /module/<name>/<relative path>
           // format. This is handled specially in webapp.js.
           let rewrittenDeps = deps.map((d) => {
@@ -93,7 +93,7 @@ define(function(require) {
         });
       });
     },
-    deleteEnvironment: function(name) {
+    deleteEnvironment: (name) => {
       // NOTE: This is brittle, relying on non-public APIs of requirejs.
       delete requirejs.s.contexts[name];
     }
