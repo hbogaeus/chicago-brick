@@ -56,12 +56,12 @@ function createScreens(grid, xOffset, yOffset, screenWidth, screenHeight) {
   for (let row = 0; row < rows; row++) {
     let rowDiv = document.createElement('div');
     rowDiv.className = 'row';
-    rowDiv.style.height = screenHeight + 'px';
+    rowDiv.style.height = `${screenHeight}px`;
     for (let col = 0; col < cols; col++) {
       let cellDiv = document.createElement('div');
       cellDiv.className = 'cell';
-      cellDiv.style.width = screenWidth + 'px';
-      cellDiv.style.height = screenHeight + 'px';
+      cellDiv.style.width = `${screenWidth}px`;
+      cellDiv.style.height = `${screenHeight}px`;
       if (grid[row][col] == '1') {
         cellDiv.appendChild(createFrameAt(
             col + xOffset, row + yOffset, screenWidth, screenHeight));
