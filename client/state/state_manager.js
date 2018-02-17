@@ -13,10 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
-  'use strict';
-  var sharedState = require('lib/shared_state');
-  var debug = require('client/util/debug')('wall:state_manager');
+define((require) => {
+  const sharedState = require('lib/shared_state');
+  const debug = require('client/util/debug')('wall:state_manager');
 
   class ClientSharedState extends sharedState.SharedState {
     constructor(name, interpolator, network) {
@@ -26,7 +25,7 @@ define(function(require) {
     }
     set(value, time) {
       if (this.owner_ !== undefined && this.network_.id !== this.owner_) {
-        throw new Error('Attempted to set state for state owned by ' + this.owner_);
+        throw new Error(`Attempted to set state for state owned by ${this.owner_}`);
       }
       super.set(value, time);
       this.network_.emit('newclientstateset',
@@ -36,54 +35,55 @@ define(function(require) {
 
   // Describes something that tracks all sharedstate and provides methods for
   // the communication of that state across the network.
-  var StateManager = function(network) {
-    // A map of tracked state name -> state variable.
-    this.trackedState_ = {};
-    this.network_ = network;
-    
-    // Listen for communication from the server. NOTE: we rely on the network's
-    // own cleanup protocol to stop listening here.
-    // TODO(applmak): Vet that this works as expected and that no further
-    // disposal is needed.
-    var manager = this;
+  class StateManager {
+    constructor(network) {
+      // A map of tracked state name -> state variable.
+      this.trackedState_ = {};
+      this.network_ = network;
 
-    network.on('newstate', function(newstate) {
-      if (newstate.name in manager.trackedState_) {
-        var currentState = manager.trackedState_[newstate.name];
-        if (currentState.owner_ === newstate.owner) {
-          return;
-        } else if (currentState.owner_ === undefined &&
-            network.id === newstate.owner) {
-          debug('Updating owner of owned state: ' + newstate.name);
-          currentState.owner_ = newstate.owner;
-          return;
+      // Listen for communication from the server. NOTE: we rely on the network's
+      // own cleanup protocol to stop listening here.
+      // TODO(applmak): Vet that this works as expected and that no further
+      // disposal is needed.
+      const manager = this;
+
+      network.on('newstate', (newstate) => {
+        if (newstate.name in manager.trackedState_) {
+          var currentState = manager.trackedState_[newstate.name];
+          if (currentState.owner_ === newstate.owner) {
+            return;
+          } else if (currentState.owner_ === undefined &&
+              network.id === newstate.owner) {
+            debug(`Updating owner of owned state: ${newstate.name}`);
+            currentState.owner_ = newstate.owner;
+            return;
+          }
+          throw new Error('Received registration for state already owned by a ' +
+              'different client. This is likely because this client attempted ' +
+              'to create state with the same name as one already registered.');
         }
-        throw new Error('Received registration for state already owned by a ' +
-            'different client. This is likely because this client attempted ' +
-            'to create state with the same name as one already registered.');
-      }
-      debug('Received new state registration ' + newstate.name);
-      manager.trackedState_[newstate.name] = new sharedState.SharedState(
-          newstate.name,
-          sharedState.decodeInterpolator(newstate.interpolatorDef),
-          newstate.owner);
-    });
-    
-    network.on('state', function(data) {
-      data.forEach(function(state) {
-        if (!(state.name in manager.trackedState_)) {
-          debug('Data received for state that wasn\'t created! ' + state.name);
-          return;
-        }
-        if (state.dataPoint !== undefined) {
-          manager.get(state.name).set(state.dataPoint.value, state.dataPoint.time);
-        }
+        debug(`Received new state registration ${newstate.name}`);
+        manager.trackedState_[newstate.name] = new sharedState.SharedState(
+            newstate.name,
+            sharedState.decodeInterpolator(newstate.interpolatorDef),
+            newstate.owner);
       });
-    });
-  };
 
-  StateManager.prototype.create = function(name, interpolatorDef) {
-    debug('Created state ' + name);
+      network.on('state', (data) => {
+        data.forEach((state) => {
+          if (!(state.name in manager.trackedState_)) {
+            debug(`Data received for state that wasn\'t created! ${state.name}`);
+            return;
+          }
+          if (state.dataPoint !== undefined) {
+            manager.get(state.name).set(state.dataPoint.value, state.dataPoint.time);
+          }
+        });
+      });
+  }
+
+  create(name, interpolatorDef) {
+    debug(`Created state ${name}`);
     if (name in this.trackedState_) {
       throw new Error(
           'Can\'t create: this state is already owned by a different client.');
@@ -92,12 +92,12 @@ define(function(require) {
         name, sharedState.decodeInterpolator(interpolatorDef), this.network_);
     this.network_.emit('newclientstatecreated',
         { name: name, interpolatorDef: interpolatorDef });
-  };
+  }
 
-  StateManager.prototype.get = function(name) {
+  get(name) {
     return this.trackedState_[name];
-  };
+  }
 
-
+}
   return StateManager;
 });
