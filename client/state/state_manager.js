@@ -49,7 +49,7 @@ define((require) => {
 
       network.on('newstate', (newstate) => {
         if (newstate.name in manager.trackedState_) {
-          var currentState = manager.trackedState_[newstate.name];
+          let currentState = manager.trackedState_[newstate.name];
           if (currentState.owner_ === newstate.owner) {
             return;
           } else if (currentState.owner_ === undefined &&
