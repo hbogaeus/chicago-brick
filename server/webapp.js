@@ -15,11 +15,11 @@ limitations under the License.
 
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
-var bodyParser = require('body-parser');
-var debug = require('debug')('wall:webapp');
-var express = require('express');
+const bodyParser = require('body-parser');
+const debug = require('debug')('wall:webapp');
+const express = require('express');
 const glob = require('glob');
 const library = require('server/modules/module_library');
 
@@ -28,7 +28,7 @@ const library = require('server/modules/module_library');
  */
 function create(flags) {
   // Force absolute paths.
-  // This allows us to execute chicago-brick as a dep from another repo while 
+  // This allows us to execute chicago-brick as a dep from another repo while
   // still finding the necessary dirs. However, this trick forces webapp.js to
   // always exist at /server/webapp.js. This will likely be true for a long
   // time, though. If the file moves, we just need to provide the relative path
@@ -38,15 +38,15 @@ function create(flags) {
   // used as a normal node dep.
   let base = path.join(__dirname, '..');
 
-  debug('webapp base dir is ' + base);
-  debug('node_modules_dir is ' + flags.node_modules_dir);
-  
+  debug(`webapp base dir is ${base}`);
+  debug(`node_modules_dir is ${flags.node_modules_dir}`);
+
   // Sub-app showing the status page.
-  var status = express();
+  let status = express();
   status.use('/', express.static('client/status'));
 
   // Sub-app serving the static content (i.e. the modules and client).
-  var app = express();
+  let app = express();
   app.use('/status', status);
   app.use('/client', express.static(path.join(base, 'client')));
   app.use('/lib', express.static(path.join(base, 'lib')));
@@ -60,7 +60,7 @@ function create(flags) {
     // designed to not let you do that, really, we create a fake res object
     // that can capture what the middleware would have written.
     let write = null, end = null;
-    
+
     return (req, res, next) => {
       write = res.write;
       end = res.end;
@@ -69,18 +69,18 @@ function create(flags) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-    
+
       res.write = function() {
         // Remove the length header.
         res.removeHeader('Content-Length');
-    
+
         // After headers, but before the real content, add the wrapping marker.
         write.call(res, 'define(function(require, exports, module) {\n');
         write.apply(res, Array.from(arguments));
         // Restore original write function, so subsequent writes work just fine.
         res.write = write;
       };
-      res.end = function() {
+      res.end = () => {
         let args = Array.from(arguments);
         if (args.length) {
           // Stuff to send... use normal write to send it.
@@ -113,7 +113,7 @@ function create(flags) {
     }
   }
 
-  app.use('/module/:name', moduleHandler, function(req, res, next){
+  app.use('/module/:name', moduleHandler, (req, res, next) => {
     const module = library.modules[req.params.name];
     if (!module) {
       debug(`No module found by name: ${req.params.name}`);
