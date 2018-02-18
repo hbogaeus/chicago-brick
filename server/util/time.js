@@ -14,18 +14,18 @@ limitations under the License.
 ==============================================================================*/
 
 'use strict';
-var time = process.hrtime();
+const time = process.hrtime();
 
-exports.now = function() {
-  var timeBits = process.hrtime(time);
+exports.now = () => {
+  let timeBits = process.hrtime(time);
   return timeBits[0] * 1000 + timeBits[1] / 1e6;
 };
 
-exports.inFuture = function(msDuration) {
+exports.inFuture = (msDuration) => {
   return exports.now() + msDuration;
 };
 
-exports.until = function(msDeadline) {
-  var d = msDeadline - exports.now();
+exports.until = (msDeadline) => {
+  let d = msDeadline - exports.now();
   return Math.max(0, d);
 };
