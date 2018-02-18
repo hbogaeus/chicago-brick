@@ -63,16 +63,16 @@ class Control {
 
   setConfig(req, res) {
     try {
-      var json = RJSON.parse(req.body.config);
+      let json = RJSON.parse(req.body.config);
       this.moduleLoader.loadModules(json);
-      var playlist = this.playlistLoader.parsePlaylist(json);
+      let playlist = this.playlistLoader.parsePlaylist(json);
+      this.playlistDriver.driveStateMachine(playlist);
+      this.currentConfig = json;
+      res.redirect('/status');
     } catch (e) {
-      res.status(400).send('Bad request: ' + e);
+      res.status(400).send(`Bad request: ${e}`);
       return;
     }
-    this.playlistDriver.driveStateMachine(playlist);
-    this.currentConfig = json;
-    res.redirect('/status');
   }
 
   getModules(req, res) {
@@ -98,14 +98,14 @@ class Control {
       json = RJSON.parse(infinitePlaylist);
       this.moduleLoader.loadModules(json);
       playlist = this.playlistLoader.parsePlaylist(json);
+      this.currentConfig = json;
+      this.playlistDriver.driveStateMachine(playlist);
+      res.redirect('/status');
     } catch (e) {
       console.log(`Error in setPlaylist: ${e}`);
-      res.status(400).send('Bad request: ' + e);
+      res.status(400).send(`Bad request: ${e}`);
       return;
     }
-    this.currentConfig = json;
-    this.playlistDriver.driveStateMachine(playlist);
-    res.redirect('/status');
   }
 
   getClientState(req, res) {
@@ -126,7 +126,7 @@ class Control {
     ret.state = this.playlistDriver.getNextTransitionType();
     ret.deadline = this.playlistDriver.getNextDeadline();
     ret.wall = wallGeometry.getGeo();
-    
+
     res.json(ret);
   }
 
@@ -135,7 +135,7 @@ class Control {
   }
 
   playModule(req, res) {
-    var moduleName = req.query.module;
+    let moduleName = req.query.module;
     if (!moduleName) {
       res.status(400).send('Expected module parameter');
       return;
