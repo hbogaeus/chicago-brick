@@ -93,7 +93,7 @@ let Player = (playerId, index, color) => {
  * lifecycle events are emitted by instances of this class.  Games are
  * automatically cleaned up when modules are torn down.
  */
-let Game = (socket, host, name, opt_options) => {
+let Game = function(socket, host, name, opt_options) {
   EventEmitter.call(this);
   let options = opt_options || {};
 
