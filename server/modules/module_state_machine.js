@@ -171,7 +171,7 @@ class DisplayState extends stateMachine.State {
     // Tell each client to transition to the module.
 
     for (const id in context.allClients) {
-      context.allClients[id].playModule(this.moduleName_, this.timeToStartDisplay_, context.geo)
+      context.allClients[id].playModule(this.moduleName_, this.timeToStartDisplay_, context.geo);
     }
 
     // Wait here until we're told to do something else.
