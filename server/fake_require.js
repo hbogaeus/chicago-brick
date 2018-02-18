@@ -44,7 +44,7 @@ module.exports = {
     // deps.
     let Module = require('module');
     let origResolve = Module._resolveFilename;
-    Module._resolveFilename = () => {
+    Module._resolveFilename = function() {
       let args = Array.prototype.slice.call(arguments);
       // For cached impots, let it go without doing anything.
       if (args[0] in env) {
@@ -62,12 +62,12 @@ module.exports = {
     };
 
     // Add our fake deps to the cache.
-    env.forEach((name) => {
+    for (let name in env) {
       let fakeModule = new Module(name, null);
-      fakeModule.exports = env[name];
-      fakeModule.loaded = true;
-      require.cache[name] = fakeModule;
-    });
+        fakeModule.exports = env[name];
+        fakeModule.loaded = true;
+        require.cache[name] = fakeModule;
+    }
 
     // Create a function that delegates to require. It contains a single
     // 'destroy' method that cleans up all of our mucking.
