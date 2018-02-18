@@ -32,7 +32,7 @@ const path = require('path');
 //  - Finally, we have to clean up this when we're done, so they don't stick
 //    around forever.
 module.exports = {
-  createEnvironment: function(env, moduleRoot) {
+  createEnvironment: (env, moduleRoot) => {
     'use strict';
     // First, create a list of the the current valid deps, so we can remove
     // any new ones that appear when it's time to clean up.
@@ -44,7 +44,7 @@ module.exports = {
     // deps.
     let Module = require('module');
     let origResolve = Module._resolveFilename;
-    Module._resolveFilename = function() {
+    Module._resolveFilename = () => {
       let args = Array.prototype.slice.call(arguments);
       // For cached impots, let it go without doing anything.
       if (args[0] in env) {
@@ -62,12 +62,12 @@ module.exports = {
     };
 
     // Add our fake deps to the cache.
-    for (let name in env) {
+    env.forEach((name) => {
       let fakeModule = new Module(name, null);
       fakeModule.exports = env[name];
       fakeModule.loaded = true;
       require.cache[name] = fakeModule;
-    }
+    });
 
     // Create a function that delegates to require. It contains a single
     // 'destroy' method that cleans up all of our mucking.
