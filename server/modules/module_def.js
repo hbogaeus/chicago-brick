@@ -30,8 +30,8 @@ const wallGeometry = require('server/util/wall_geometry');
 const geometry = require('lib/geometry');
 
 const read = (path) => {
-  return new Promise(function(resolve, reject) {
-    fs.readFile(path, 'utf-8', function(err, content) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf-8', (err, content) => {
       if (err) {
         reject(err);
       } else {
@@ -55,11 +55,11 @@ const evalModule = (contents, name, moduleRoot, path, layoutGeometry, network, g
         y: p.y - layoutGeometry.extents.y
       };
     })),
-    debug: debugFactory('wall:module:' + name),
+    debug: debugFactory(`wall:module:${name}`),
     globalWallGeometry: wallGeometry.getGeo(),
 
     // The main registration function.
-    register: function(server, client) {
+    register: (server, client) => {
       classes.server = server;
       classes.client = client;
     },
@@ -195,7 +195,7 @@ class ModuleDef extends EventEmitter {
       };
 
       this.whenLoadedPromise = read(fullPath).then(contents => {
-        debug('Read ' + fullPath);
+        debug(`Read ${fullPath}`);
         // Prepend a directive to make sure the module runs in strict mode.
         // Append a directive that tells Chrome and Node that the client script
         // is, in fact, a file. This makes debugging these far simpler.
@@ -205,15 +205,15 @@ class ModuleDef extends EventEmitter {
         rewatch();
 
         if (verify(this.name, contents, this.root, this.path)) {
-          debug('Verified ' + fullPath);
+          debug(`Verified ${fullPath}`);
           this.valid = true;
           this.def = contents;
         } else {
-          debug('Failed verification at ' + fullPath);
-          throw new Error('Script at "' + fullPath + '" is not verifiable!');
+          debug(`Failed verification at ${fullPath}`);
+          throw new Error(`Script at "${fullPath}" is not verifiable!`);
         }
       }, e => {
-        debug(fullPath + ' not found!');
+        debug(`${fullPath} not found!`);
 
         // Intentionally do not restart watcher.
         // Allow users to note that this module failed to load correctly.
@@ -256,4 +256,3 @@ class ModuleDef extends EventEmitter {
 
 // Export the module def class.
 module.exports = ModuleDef;
-
