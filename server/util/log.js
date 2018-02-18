@@ -15,10 +15,10 @@ limitations under the License.
 
 'use strict';
 
-var recentErrors = [];
-var ERROR_BUFFER_SIZE = 100;
+let recentErrors = [];
+const ERROR_BUFFER_SIZE = 100;
 
-var pushError = function(record) {
+let pushError = (record) => {
   recentErrors.push(record);
   if (recentErrors.length > ERROR_BUFFER_SIZE) {
     recentErrors.shift();
@@ -30,10 +30,10 @@ var pushError = function(record) {
  * provided by the standard debug module.
  * The returned function can consume strings or Error objects.
  */
-var error = function(debug) {
-  return function(e) {
+let error = (debug) => {
+  return (e) => {
     debug(e);
-    var record = {
+    let record = {
       origin: 'SERVER',
       timestamp: new Date(),
       namespace: debug.namespace,
@@ -53,8 +53,8 @@ var error = function(debug) {
  * provided by the standard debug module.
  * The returned function consumes records supplied by the client.
  */
-var clientError = function(debug) {
-  return function(e) {
+let clientError = (debug) => {
+  return (e) => {
     debug(e);
     pushError({
       origin: 'CLIENT',
@@ -69,7 +69,7 @@ var clientError = function(debug) {
 /**
  * Retrieves a list of recent errors.
  */
-var getRecentErrors = function() {
+let getRecentErrors = function() {
   return recentErrors;
 };
 
