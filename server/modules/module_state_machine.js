@@ -17,8 +17,6 @@ limitations under the License.
 require('lib/promise');
 
 const debug = require('debug')('wall:module_state_machine');
-const assert = require('lib/assert');
-
 const stateMachine = require('lib/state_machine');
 const time = require('server/util/time');
 const library = require('server/modules/module_library');
@@ -39,10 +37,10 @@ function isDisplayInPoly(rect, poly) {
 // by this class, only read.
 class ModuleStateMachine extends stateMachine.Machine {
   constructor(allClients) {
-    super(new IdleState, debug);
-    
+    super(new IdleState(), debug);
+
     const geo = wallGeometry.getGeo();
-    
+
     // Map of ID to ClientControlStateMachine for all clients.
     this.allClients_ = allClients;
 
@@ -51,12 +49,12 @@ class ModuleStateMachine extends stateMachine.Machine {
       server: new ServerStateMachine(geo),
       allClients,
     });
-    
+
     // Forward errors from my child state machines to my listener.
     this.context_.server.setErrorListener(error => this.errorListener_(error));
-    for (const id in this.allClients_) {
-      this.allClients_[id].setErrorListener(error => this.errorListener_(error));
-    }
+    this.allClients_.forEach( client => {
+      client.setErrorListener(error => this.errorListener_(error));
+    });
 
     this.reloadHandler = reloadedModule => {
       // If the module that was just reloaded is the same one that we are playing, we should reload it.
@@ -68,11 +66,11 @@ class ModuleStateMachine extends stateMachine.Machine {
       }
     };
     library.on('reloaded', this.reloadHandler);
-    
+
     /** True when the reload handler is installed. */
     this.reloadHandlerInstalled_ = true;
   }
-  
+
   // Turn off the state machine at the specified, coordinated time.
   fadeToBlack(deadline) {
     if (monitor.isEnabled()) {
@@ -82,29 +80,29 @@ class ModuleStateMachine extends stateMachine.Machine {
         deadline: deadline
       }});
     }
-    
+
     if (this.reloadHandlerInstalled_) {
       library.removeListener('reloaded', this.reloadHandler);
       this.reloadHandlerInstalled_ = false;
     }
 
     // Tell the clients to stop.
-    for (const id in this.allClients_) {
-      this.allClients_[id].playModule('_empty', deadline, this.context_.geo);
-    }
-    
+    this.allClients_.forEach( client => {
+      client.playModule('_empty', deadline, this.context_.geo);
+    });
+
     // Tell the server to stop.
     this.context_.server.playModule('_empty', deadline);
 
     // Set us back to idle, awaiting further instructions.
-    this.transitionTo(new IdleState);
+    this.transitionTo(new IdleState());
   }
-  
+
   newClient(clientInfo) {
     let client = this.allClients_[clientInfo.socket.id];
     this.state.newClient(client, this.context_.geo);
   }
-  
+
   playModule(moduleName, timeToStartDisplay) {
     if (monitor.isEnabled()) {
       monitor.update({module: {
@@ -116,7 +114,7 @@ class ModuleStateMachine extends stateMachine.Machine {
       library.on('reloaded', this.reloadHandler);
       this.reloadHandlerInstalled_ = true;
     }
-    
+
     this.state.playModule(moduleName, timeToStartDisplay);
   }
   getGeo() {
@@ -132,7 +130,7 @@ class IdleState extends stateMachine.State {
         state: this.getName(),
       }});
     }
-    
+
     this.transition_ = transition;
   }
   newClient(client) {}
@@ -150,15 +148,15 @@ class DisplayState extends stateMachine.State {
 
     // This current module we are attempting to show.
     this.moduleName_ = moduleName;
-    
+
     // The time that we should begin to show the new module.
     this.timeToStartDisplay_ = timeToStartDisplay;
   }
   enter(transition, context) {
     this.transition_ = transition;
-    
+
     debug(`Displaying ${this.moduleName_} starting at ${this.timeToStartDisplay_}`);
-    
+
     if (monitor.isEnabled()) {
       monitor.update({module: {
         time: time.now(),
@@ -166,15 +164,16 @@ class DisplayState extends stateMachine.State {
         state: this.getName(),
       }});
     }
-    
+
     // Tell the server to transition to this new module.
     context.server.playModule(this.moduleName_, this.timeToStartDisplay_, context.geo);
 
     // Tell each client to transition to the module.
-    for (const id in context.allClients) {
-      context.allClients[id].playModule(this.moduleName_, this.timeToStartDisplay_, context.geo)
-    }
-    
+
+    context.allClients.forEach( client => {
+      client.playModule(this.moduleName_, this.timeToStartDisplay_, context.geo);
+    });
+
     // Wait here until we're told to do something else.
   }
   newClient(client, geo) {
