@@ -52,9 +52,9 @@ class ModuleStateMachine extends stateMachine.Machine {
 
     // Forward errors from my child state machines to my listener.
     this.context_.server.setErrorListener(error => this.errorListener_(error));
-    this.allClients_.forEach( client => {
-      client.setErrorListener(error => this.errorListener_(error));
-    });
+    for (const id in this.allClients_) {
+      this.allClients_[id].setErrorListener(error => this.errorListener_(error));
+    }
 
     this.reloadHandler = reloadedModule => {
       // If the module that was just reloaded is the same one that we are playing, we should reload it.
@@ -87,9 +87,9 @@ class ModuleStateMachine extends stateMachine.Machine {
     }
 
     // Tell the clients to stop.
-    this.allClients_.forEach( client => {
-      client.playModule('_empty', deadline, this.context_.geo);
-    });
+    for (const id in this.allClients_) {
+      this.allClients_[id].playModule('_empty', deadline, this.context_.geo);
+    }
 
     // Tell the server to stop.
     this.context_.server.playModule('_empty', deadline);
@@ -170,9 +170,9 @@ class DisplayState extends stateMachine.State {
 
     // Tell each client to transition to the module.
 
-    context.allClients.forEach( client => {
-      client.playModule(this.moduleName_, this.timeToStartDisplay_, context.geo);
-    });
+    for (const id in context.allClients) {
+      context.allClients[id].playModule(this.moduleName_, this.timeToStartDisplay_, context.geo)
+    }
 
     // Wait here until we're told to do something else.
   }
