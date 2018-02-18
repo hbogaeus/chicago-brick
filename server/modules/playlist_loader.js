@@ -15,13 +15,11 @@ limitations under the License.
 
 'use strict';
 
-var RJSON = require('relaxed-json');
-var assert = require('assert');
-var debug = require('debug')('wall:playlist_loader');
-var fs = require('fs');
-
-var Layout = require('server/modules/layout');
-var library = require('server/modules/module_library');
+const RJSON = require('relaxed-json');
+const assert = require('assert');
+const fs = require('fs');
+const Layout = require('server/modules/layout');
+const library = require('server/modules/module_library');
 
 class PlaylistLoader {
 
@@ -40,7 +38,7 @@ class PlaylistLoader {
         // TODO(applmak): Once we support transition-on-reload, we don't need to do this.
         names = names.concat(names);
       }
-      
+
       names.forEach(m => assert(m in library.modules, `--module "${m}" can't be found!'`));
     } else if (layout.collection) {
       // Special collection name to run all available modules.
@@ -49,9 +47,9 @@ class PlaylistLoader {
       } else {
         assert(
             layout.collection in collections,
-            'Unknown collection name: ' + layout.collection);
+            `Unknown collection name:${layout.collection}`);
         names = collections[layout.collection];
-      }  
+      }
       names.forEach(m => assert(m in library.modules, `Module "${m}" referenced by collection "${layout.collection}" can't be found!'`));
     } else {
       assert('modules' in layout, 'Missing modules list in layout def!');
@@ -65,7 +63,7 @@ class PlaylistLoader {
   getInitialPlaylistConfig() {
     // TODO(applmak): Verify this encoding.
     // TODO(applmak): Does this API need to exist?
-    var playlistConfig = fs.readFileSync(this.flags.playlist, 'utf8');
+    let playlistConfig = fs.readFileSync(this.flags.playlist, 'utf8');
     return RJSON.parse(playlistConfig);
   }
 
