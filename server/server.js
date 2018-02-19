@@ -79,7 +79,7 @@ const FLAG_DEFS = [
 ];
 let flags = commandLineArgs(FLAG_DEFS);
 if (flags.help) {
-  console.log('Available flags: ' + commandLineUsage({optionList: FLAG_DEFS}));
+  console.log(`Available flags: ${commandLineUsage({optionList: FLAG_DEFS})}`);
   process.exit();
 }
 debug('flags', flags);
@@ -93,8 +93,8 @@ if (flags.use_geometry) {
 }
 
 if (flags.screen_width) {
-  var xscale = flags.screen_width;
-  var yscale = xscale * 1080 / 1920;
+  let xscale = flags.screen_width;
+  let yscale = xscale * 1080 / 1920;
   wallGeometry.setScale(xscale, yscale);
 }
 
@@ -114,12 +114,12 @@ if (playlist.length === 0) {
   throw new Error('Nothing to play!');
 }
 
-var app = webapp.create(flags);
+let app = webapp.create(flags);
 
 const clients = {};
 const layoutSM = new LayoutStateMachine(clients);
 const driver = playlistDriver.makeDriver(layoutSM);
-var control = new Control(driver, clients, moduleLoader, playlistLoader);
+let control = new Control(driver, clients, moduleLoader, playlistLoader);
 control.installHandlers(app);
 
 game.init(flags);
@@ -128,10 +128,10 @@ if (flags.credential_dir) {
   credentials.loadFromDir(flags.credential_dir);
 }
 
-var server;
-var listener = function() {
-  var host = server.address().address;
-  var port = server.address().port;
+let server;
+let listener = () => {
+  let host = server.address().address;
+  let port = server.address().port;
 
   debug('Server listening at http://%s:%s', host, port);
 };
@@ -149,17 +149,17 @@ if (flags.use_https) {
   server = app.listen(flags.port, listener);
 }
 
-var peerServer = new PeerServer({port: flags.port + 6000, path: '/peerjs'});
-peerServer.on('connection', function(id) {
+let peerServer = new PeerServer({port: flags.port + 6000, path: '/peerjs'});
+peerServer.on('connection', (id) => {
   debug('peer connection!', id);
 });
-peerServer.on('disconnect', function(id) {
+peerServer.on('disconnect', (id) => {
   debug('peer disconnect!', id);
 });
 
 network.openWebSocket(server);
 
-network.on('new-client', function(client) {
+network.on('new-client', (client) => {
   if (monitor.isEnabled()) {
     monitor.update({layout: {
       time: time.now(),
@@ -170,7 +170,7 @@ network.on('new-client', function(client) {
   layoutSM.newClient(client);
 });
 
-network.on('lost-client', function(id) {
+network.on('lost-client', (id) => {
   if (id in clients) {
     if (monitor.isEnabled()) {
       const rect = clients[id].getClientInfo().rect;
@@ -195,5 +195,5 @@ if (flags.enable_monitoring) {
   monitor.enable();
 }
 
-debug('Running playlist of ' + playlist.length + ' items');
+debug(`Running playlist of ${playlist.length} items`);
 driver.driveStateMachine(playlist);
