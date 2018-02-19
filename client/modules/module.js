@@ -13,29 +13,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
 
-  var _ = require('underscore');
-
-  var debug = require('client/util/debug')('wall:client_module');
-  var debugFactory = require('client/util/debug');
-  var error = require('client/util/log').error(debug);
-  var fakeRequire = require('client/fake_require');
-  var geometry = require('lib/geometry');
-  var moduleInterface = require('lib/module_interface');
-  var network = require('client/network/network');
-  var peerNetwork = require('client/network/peer');
-  var safeEval = require('lib/eval');
-  var StateManager = require('client/state/state_manager');
-  var timeManager = require('client/util/time');
-  var TitleCard = require('client/title_card');
-  var moduleTicker = require('client/modules/module_ticker');
+  const debug = require('client/util/debug')('wall:client_module');
+  const debugFactory = require('client/util/debug');
+  const error = require('client/util/log').error(debug);
+  const fakeRequire = require('client/fake_require');
+  const geometry = require('lib/geometry');
+  const moduleInterface = require('lib/module_interface');
+  const network = require('client/network/network');
+  const peerNetwork = require('client/network/peer');
+  const StateManager = require('client/state/state_manager');
+  const timeManager = require('client/util/time');
+  const TitleCard = require('client/title_card');
+  const moduleTicker = require('client/modules/module_ticker');
 
   function createNewContainer(name) {
-    var newContainer = document.createElement('div');
+    let newContainer = document.createElement('div');
     newContainer.className = 'container';
-    newContainer.id = 't-' + timeManager.now();
+    newContainer.id = `t-${timeManager.now()}`;
     newContainer.style.opacity = 0.0;
     newContainer.setAttribute('moduleName', name);
     document.querySelector('#containers').appendChild(newContainer);
@@ -116,17 +113,17 @@ define(function(require) {
         `${this.geo.extents.serialize()}-${this.deadline}`);
       let openNetwork = this.network.open();
 
-      this.contextName = 'module-' + this.deadline;
+      this.contextName = `module-${this.deadline}`;
       let classes = {};
 
       return fakeRequire.createEnvironment(this.contextName, this.name, {
-        debug: debugFactory('wall:module:' + this.name),
+        debug: debugFactory(`wall:module:${this.name}`),
         game: undefined,
         network: openNetwork,
         titleCard: this.titleCard.getModuleAPI(),
         state: new StateManager(openNetwork),
         globalWallGeometry: this.geo,
-        wallGeometry: new geometry.Polygon(this.geo.points.map(function(p) {
+        wallGeometry: new geometry.Polygon(this.geo.points.map((p) => {
           return {x: p.x - this.geo.extents.x, y: p.y - this.geo.extents.y};
         }, this)),
         peerNetwork: peerNetwork,
@@ -146,10 +143,10 @@ define(function(require) {
 
             // Sanity checks on requested code.
             if (!classes.client) {
-              throw new Error('Failed to parse module ' + this.name);
+              throw new Error(`Failed to parse module ${this.name}`);
             }
             if (!(classes.client.prototype instanceof moduleInterface.Client)) {
-              throw new Error('Malformed module definition! ' + this.name);
+              throw new Error(`Malformed module definition! ${this.name}`);
             }
             this.instance = new classes.client(this.config);
             resolve();
@@ -188,7 +185,7 @@ define(function(require) {
     // Returns true if module is still OK.
     fadeIn(deadline) {
       this.container.style.transition =
-          'opacity ' + timeManager.until(deadline).toFixed(0) + 'ms';
+          `opacity ${timeManager.until(deadline).toFixed(0)}ms`;
       this.container.style.opacity = 1.0;
 
       if (!this.path) {
@@ -215,7 +212,7 @@ define(function(require) {
     fadeOut(deadline) {
       if (this.container) {
         this.container.style.transition =
-            'opacity ' + timeManager.until(deadline).toFixed(0) + 'ms';
+            `opacity ${timeManager.until(deadline).toFixed(0)}ms`;
         this.container.style.opacity = 0.0;
       }
       if (!this.path) {
