@@ -15,15 +15,15 @@ limitations under the License.
 
 'use strict';
 
-var googleapis = require('googleapis');
-var credentials = require('server/util/credentials');
+const googleapis = require('googleapis');
+const credentials = require('server/util/credentials');
 
-var SCOPES = [
+const SCOPES = [
   'https://www.googleapis.com/auth/drive.readonly',
   'https://www.googleapis.com/auth/youtube.readonly'
 ];
 
-var key = null;
+let key = null;
 /**
  * Returns an API client that has authenticated with a service account.
  * To use this, create a service account in the Google Developers Console
@@ -37,7 +37,7 @@ function getAuthenticatedClient() {
       return Promise.reject('Missing required service account key file');
     }
   }
-  var jwtClient = new googleapis.auth.JWT(
+  let jwtClient = new googleapis.auth.JWT(
       key.client_email, null, key.private_key, SCOPES);
   return new Promise((resolve, reject) => {
     jwtClient.authorize((err, tokens) => {
