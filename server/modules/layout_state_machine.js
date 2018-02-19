@@ -16,8 +16,6 @@ limitations under the License.
 'use strict';
 
 const debug = require('debug')('wall:layout_state_machine');
-const geometry = require('lib/geometry');
-
 const stateMachine = require('lib/state_machine');
 const time = require('server/util/time');
 const ModuleStateMachine = require('server/modules/module_state_machine');
@@ -25,7 +23,7 @@ const monitor = require('server/monitoring/monitor');
 
 class LayoutStateMachine extends stateMachine.Machine {
   constructor(clients) {
-    super(new IdleState, debug);
+    super(new IdleState(), debug);
 
     this.setContext({
       // All known clients. Maps client ID to ClientControlStateMachine.
@@ -39,14 +37,14 @@ class LayoutStateMachine extends stateMachine.Machine {
   fadeOut() {
     // Wipe the requested module.
     this.context_.module = null;
-    
+
     if (monitor.isEnabled()) {
       monitor.update({layout: {
         time: time.now(),
         event: `fadeOut`,
       }});
     }
-    
+
     return this.state.fadeOut();
   }
   // Tell the state machines to play a module.
@@ -58,9 +56,9 @@ class LayoutStateMachine extends stateMachine.Machine {
         event: `playModule: ${moduleName}`,
       }});
     }
-    
+
     this.context_.module = moduleName;
-    
+
     // Tell the current state that a request to play a module has arrived.
     return this.state.playModule(moduleName);
   }
@@ -83,7 +81,7 @@ class IdleState extends stateMachine.State {
   }
   playModule(moduleName) {
     // Start showing a thing!
-    this.transition_(new DisplayState);
+    this.transition_(new DisplayState());
   }
 }
 
@@ -97,9 +95,9 @@ class DisplayState extends stateMachine.State {
         deadline: deadline,
       }});
     }
-    
+
     this.transition_ = transition;
-    
+
     // Make a module state machine (that manages the lifecycle of the module interface for both
     // client and server).
     this.moduleSM_ = new ModuleStateMachine(context.clients);
@@ -107,7 +105,7 @@ class DisplayState extends stateMachine.State {
     this.moduleSM_.setErrorListener(error => {
       throw error;
     });
-    
+
     // Tell the new module state machines to play any requested modules for this state (if any arrived
     // since we we were told to go here, say, during the fade).
     this.moduleSM_.playModule(context.module, deadline);
@@ -126,11 +124,11 @@ class DisplayState extends stateMachine.State {
 class FadeOutState extends stateMachine.State {
   constructor(moduleSM, resolve) {
     super();
-    
+
     this.moduleSM_ = moduleSM;
-    
+
     this.timer_ = null;
-    
+
     this.resolves_ = [resolve];
   }
   enter(transition, context) {
@@ -144,17 +142,17 @@ class FadeOutState extends stateMachine.State {
         deadline: deadline,
       }});
     }
-    
+
     debug(`Fading out at ${deadline} ms`);
     this.moduleSM_.fadeToBlack(now);
     this.timer_ = setTimeout(() => {
       if (context.module) {
         // Someone told us to switch modules while we were fading!
         // No problem, let's show it!
-        transition(new DisplayState);
+        transition(new DisplayState());
       } else {
         // We've no one to switch to next, so let's just stay faded out.
-        transition(new IdleState);
+        transition(new IdleState());
       }
       this.resolves_.forEach(r => r());
     }, time.until(deadline));
