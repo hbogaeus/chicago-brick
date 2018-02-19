@@ -16,7 +16,7 @@ limitations under the License.
 'use strict';
 /* globals d3 */
 
-var bgColors = [
+let bgColors = [
   'red', 'blue', 'green', 'yellow',
 ];
 
@@ -32,24 +32,25 @@ function buildPlayableModuleMap(modules, config) {
   );
 
   let playableCollections = {};
-  config.current.playlist.forEach(function(playlist) {
+  config.current.playlist.forEach((playlist) => {
     if (playlist.collection === undefined) {
       modules.forEach(module => playableModules[module.name] += 1);
     } else if (playlist.collection == '__ALL__') {
-      playableCollections['__ALL__'] = new Array();
+      playableCollections.__ALL__ = [];
       modules.forEach(
-        module => playableCollections['__ALL__'].push(module.name)
+        module => playableCollections.__ALL__.push(module.name)
       );
     } else {
       playableCollections[playlist.collection] = config.current.collections[playlist.collection];
     }
   });
 
-  for (let collection in playableCollections) {
-    playableCollections[collection].forEach(
-      module => playableModules[module] += 1
-    );
-  }
+  playableCollections.forEach( (collection) => {
+    collection.forEach( (module) => {
+    	 playableModules[module] += 1;
+  	});
+	});
+
   return playableModules;
 }
 
@@ -76,13 +77,13 @@ class BigBoard {
   }
 
   update() {
-    var layoutReq = fetchJson('layout')
+    let layoutReq = fetchJson('layout')
         .then(layout => this.layout = layout, err => {
           if (this.layout) {
             this.layout.state = null;
           }
         });
-    var clientsReq = fetchJson('clients')
+    let clientsReq = fetchJson('clients')
         .then(clients => this.clients = clients, err => {
           this.clients = [];
         });
@@ -92,12 +93,12 @@ class BigBoard {
   }
 
   renderError(e) {
-    var date = new Date(e.timestamp).toLocaleString();
+    let date = new Date(e.timestamp).toLocaleString();
     return `${date} ${e.origin} ${e.namespace} ${e.message}`;
   }
 
   showErrors(errors) {
-    var items = d3.select('#errors')
+    let items = d3.select('#errors')
         .selectAll('.line')
         .data(errors, error => error.timestamp);
     items.enter().append('div')
@@ -114,8 +115,8 @@ class BigBoard {
   }
 
   render() {
-    var wall = this.layout.wall;
-    var width, height, maxSize;
+    let wall = this.layout.wall;
+    let width, height, maxSize;
     if (wall.extents.w > wall.extents.h) {
       width = window.innerWidth - 40;
       height = width * wall.extents.h / wall.extents.w;
@@ -126,21 +127,21 @@ class BigBoard {
       maxSize = height;
     }
 
-    var chart = d3.select('svg');
+    let chart = d3.select('svg');
     chart.attr('width', width);
     chart.attr('height', height);
 
-    var scale = d3.scale.linear()
+    let scale = d3.scale.linear()
         .domain([0, Math.max(wall.extents.w, wall.extents.h)])
         .range([0, maxSize]);
-    var lineFromPoints = d3.svg.line()
+    let lineFromPoints = d3.svg.line()
         .x((pt) => scale(pt.x))
         .y((pt) => scale(pt.y));
 
-    var clientKey = (d) => [d.rect.x, d.rect.y].join(',');
-    var clients = chart.select('#clients').selectAll('.client')
+    let clientKey = (d) => [d.rect.x, d.rect.y].join(',');
+    let clients = chart.select('#clients').selectAll('.client')
         .data(this.clients, clientKey);
-    var g = clients.enter().append('g').attr('class', 'client');
+    let g = clients.enter().append('g').attr('class', 'client');
     g.append('rect')
         .attr('stroke', '#ccc')
         .attr('fill', 'none')
@@ -156,7 +157,7 @@ class BigBoard {
     clients.exit().remove();
 
     // TODO(jacobly): not sure this is the right way to bind a single value.
-    var wallGeo = chart.selectAll('.wall').data([wall]);
+    let wallGeo = chart.selectAll('.wall').data([wall]);
     wallGeo.enter().append('path')
         .attr('class', 'wall')
         .attr('stroke', 'black')
@@ -165,40 +166,40 @@ class BigBoard {
     wallGeo
         .attr('d', lineFromPoints(wall.points));
 
-    var layout = chart.select('#outline').data([this.layout]);
+    let layout = chart.select('#outline').data([this.layout]);
     layout.append('text')
         .attr('stroke', 'gray')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle');
     layout.select('text')
         .text(l => {
-          var r = l.state;
+          let r = l.state;
           if (l.deadline !== null && l.deadline !== Infinity) {
             r += ': ' + (l.deadline - this.now).toFixed(2);
           }
           return r;
         })
         .attr('x', d => {
-          var bbox = chart[0][0].getBBox();
+          let bbox = chart[0][0].getBBox();
           return bbox.x + bbox.width / 2;
         })
         .attr('y', d => {
-          var bbox = chart[0][0].getBBox();
+          let bbox = chart[0][0].getBBox();
           return bbox.y + bbox.height / 2;
         });
   }
 }
 
-var board = new BigBoard();
+let board = new BigBoard();
 board.update();
 setInterval(() => board.update(), 5000);
 
-requirejs(['/config.js'], function(require) {
+requirejs(['/config.js'], (require) => {
   requirejs(['client/network/network',
-             'client/util/time'], function(network, time) {
+             'client/util/time'], (network, time) => {
     network.openConnection();
     time.start();
-    setInterval(function() {
+    setInterval(() => {
       if (board) {
         board.setNow(time.now());
       }
@@ -217,13 +218,13 @@ Promise.all([fetchJson('modules'), fetchJson('config')]).then(bits => {
 
   // Draw the list of available modules in the "play immediately" section.
   let module_list = document.getElementById('module_list');
-  modules.forEach(function(module) {
+  modules.forEach((module) => {
     let li = document.createElement('li');
     if (modulesInPlaylist[module.name] > 1) {
       const a = document.createElement('a');
       a.id = 'module_' + module.name;
-      a.addEventListener('click', function() {
-        fetch(makeRequest('/api/play?module=' + module.name, 'POST', ''));
+      a.addEventListener('click', () => {
+        fetch(makeRequest(`/api/play?module=${module.name}`, 'POST', ''));
       });
       a.textContent = module.name;
       li.appendChild(a);
@@ -234,15 +235,15 @@ Promise.all([fetchJson('modules'), fetchJson('config')]).then(bits => {
     }
 
     let a2 = document.createElement("a");
-    a2.id = 'forever_module_' + module.name;
-    a2.addEventListener('click', function() {
-      fetch(makeRequest('/api/playlist', 'POST', JSON.stringify(module))).then(function(res) {
+    a2.id = `forever_module_${module.name}`;
+    a2.addEventListener('click', () => {
+      fetch(makeRequest('/api/playlist', 'POST', JSON.stringify(module))).then((res) => {
         if (res.ok && res.redirected) {
           document.location = res.url;
         }
       });
     });
-    a2.textContent = '(play ' + module.name + ' indefinitely)';
+    a2.textContent = `(play ${module.name} indefinitely)`;
     li.appendChild(a2);
 
     module_list.appendChild(li);
