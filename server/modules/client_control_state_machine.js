@@ -24,7 +24,7 @@ const logError = require('server/util/log').error(debug);
 
 class ClientControlStateMachine extends stateMachine.Machine {
   constructor(client) {
-    super(new IdleState, debug);
+    super(new IdleState(), debug);
 
     // Assign client socket to context so that states can communicate with the
     // client.
@@ -36,7 +36,7 @@ class ClientControlStateMachine extends stateMachine.Machine {
   handleError(error) {
     logError(error);
     // It's unexpected that we'll ever get into an error state here. If we do, we transition immediately to Idle and await further instructions.
-    this.transitionTo(new IdleState);
+    this.transitionTo(new IdleState());
     // Re-enable the state machine.
     this.driveMachine();
   }
@@ -69,16 +69,16 @@ class PrepareState extends stateMachine.State {
 
     // The deadline at which we should transition to the new module.
     this.deadline_ = deadline;
-    
+
     // The geometry of the wall.
     this.geo_ = geo;
-    
+
     this.timer_ = null;
   }
   enter(transition, context) {
     this.transition_ = transition;
     let client = context.client;
-    
+
     // Tell the client to load the relevant module.
     client.socket.emit('loadModule', {
       module: this.moduleDef_.serializeForClient(),
