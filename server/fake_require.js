@@ -72,7 +72,7 @@ module.exports = {
     // Create a function that delegates to require. It contains a single
     // 'destroy' method that cleans up all of our mucking.
     let ret = path => require(path);
-    ret.destroy = () => {
+    ret.destroy = function() {
       // Restore _resolveFilename.
       Module._resolveFilename = origResolve;
 
