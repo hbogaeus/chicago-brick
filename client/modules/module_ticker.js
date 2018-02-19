@@ -13,23 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
   const time = require('client/util/time');
   const debug = require('client/util/debug')('wall:module_ticker');
   const error = require('client/util/log').error(debug);
   const monitor = require('client/monitoring/monitor');
-  
+
   // An array of {module:Module, globals:Object}.
-  var modulesToDraw = [];
+  let modulesToDraw = [];
 
   // Drawing loop.
-  var lastTime = 0;
+  let lastTime = 0;
   function draw() {
-    var now = time.now();
-    var delta = now - lastTime;
+    let now = time.now();
+    let delta = now - lastTime;
 
-    modulesToDraw.forEach(function(pair) {
+    modulesToDraw.forEach((pair) => {
       try {
         pair.module.draw(now, delta);
       } catch (e) {
@@ -43,14 +43,14 @@ define(function(require) {
   window.requestAnimationFrame(draw);
 
   return {
-    add: function(name, module, globals) {
+    add: (name, module, globals) => {
       modulesToDraw.push({name, module, globals});
-      debug('Add: We are now drawing ' + modulesToDraw.length + ' modules');
+      debug(`Add: We are now drawing ${modulesToDraw.length} modules`);
       monitor.markDrawnModules(modulesToDraw.map(m => m.name));
     },
-    remove: function(module) {
+    remove: (module) => {
       modulesToDraw = modulesToDraw.filter(pair => pair.module !== module);
-      debug('Remove: We are now drawing ' + modulesToDraw.length + ' modules');
+      debug(`Remove: We are now drawing ${modulesToDraw.length} modules`);
       monitor.markDrawnModules(modulesToDraw.map(m => m.name));
     }
   };
