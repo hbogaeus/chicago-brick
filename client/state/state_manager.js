@@ -12,6 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+'use strict';
 
 define((require) => {
   const sharedState = require('lib/shared_state');
@@ -45,7 +46,7 @@ define((require) => {
       // own cleanup protocol to stop listening here.
       // TODO(applmak): Vet that this works as expected and that no further
       // disposal is needed.
-      const manager = this;
+      let manager = this;
 
       network.on('newstate', (newstate) => {
         if (newstate.name in manager.trackedState_) {
