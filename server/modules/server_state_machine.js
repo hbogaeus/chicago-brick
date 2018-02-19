@@ -29,7 +29,7 @@ const monitor = require('server/monitoring/monitor');
 
 class ServerStateMachine extends stateMachine.Machine {
   constructor(wallGeometry) {
-    super(new IdleState, debug);
+    super(new IdleState(), debug);
 
     // The geometry of our region of the wall. A single Polygon.
     this.setContext({geo: wallGeometry});
@@ -57,7 +57,7 @@ class IdleState extends stateMachine.State {
     }
   }
   playModule(moduleName, deadline) {
-    this.transition_(new PrepareState(new RunningModule(library.modules['_empty']), moduleName, deadline));
+    this.transition_(new PrepareState(new RunningModule(library.modules._empty), moduleName, deadline));
   }
 }
 
@@ -75,10 +75,10 @@ class PrepareState extends stateMachine.State {
 
     // The new module.
     this.module_ = null;
-    
+
     // The deadline at which we should transition to the new module.
     this.deadline_ = deadline;
-    
+
     this.timer_ = null;
   }
   enter(transition, context) {
@@ -89,9 +89,9 @@ class PrepareState extends stateMachine.State {
         deadline: this.deadline_
       }});
     }
-    
+
     this.transition_ = transition;
-    
+
     // Don't begin preparing the module until we've loaded it.
     this.moduleDef_.whenLoadedPromise.then(() => {
       // The module we're trying to load.
@@ -105,7 +105,7 @@ class PrepareState extends stateMachine.State {
       this.module_.willBeShownSoon(this.deadline_).then(() => {
         transition(new TransitionState(this.oldModule_, this.module_, this.deadline_));
       });
-    
+
       // Schedule a timer to trip if we take too long. We'll transition anyway,
       // though.
       this.timer_ = setTimeout(() => {
@@ -123,13 +123,13 @@ class PrepareState extends stateMachine.State {
       // to go somewhere else, we need to meet the module interface contract by
       // telling the module that we are going to hide it at the old deadline.
       this.module_.willBeHiddenSoon(this.deadline_);
-      
+
       // And because we're going to forget about this module after this point, we
       // really need to dispose of it.
       this.module_.dispose();
     }
-    
-    // Now, we're already told the old module that we are hiding it, 
+
+    // Now, we're already told the old module that we are hiding it,
     // and we'll tell it we're going to hide it again with a different deadline.
     // TODO(applmak): We should tighten up the API here to avoid the double
     // willBeHiddenSoon.
@@ -160,7 +160,7 @@ class TransitionState extends stateMachine.State {
         deadline: this.deadline_
       }});
     }
-    
+
     this.transition_ = transition;
     // 5 second transition.
     let endTransition = this.deadline_ + 5000;
@@ -169,7 +169,7 @@ class TransitionState extends stateMachine.State {
 
       this.timer_ = setTimeout(() => {
         moduleTicker.remove(this.oldModule_);
-        
+
         this.transition_(new DisplayState(this.module_));
       }, time.until(endTransition));
     }, time.until(this.deadline_));
@@ -183,7 +183,7 @@ class TransitionState extends stateMachine.State {
     // But that means that we need to manually clean up N.
     this.module_.willBeHiddenSoon(deadline);
     moduleTicker.remove(this.module_);
-    
+
     // Safely prepare the new module.
     this.transition_(new PrepareState(this.oldModule_, moduleName, deadline));
   }
@@ -203,7 +203,7 @@ class DisplayState extends stateMachine.State {
         state: this.getName(),
       }});
     }
-    
+
     this.transition_ = transition;
   }
   playModule(moduleName, deadline) {
