@@ -14,45 +14,43 @@ limitations under the License.
 ==============================================================================*/
 
 'use strict';
-var time = require('server/util/time');
-var debug = require('debug')('wall:module_ticker');
+const time = require('server/util/time');
+const debug = require('debug')('wall:module_ticker');
 
 // An array of RunningModule objects (see server_state_machine).
-var modulesToTick = [];
+let modulesToTick = [];
 
 // Ticking loop.
-var lastTime = 0;
-var interval = 1000.0 / 10.0;  // 10 FPS
+let lastTime = 0;
+let interval = 1000.0 / 10.0;  // 10 FPS
 
 function tick() {
-  var start = time.now();
+  let start = time.now();
   modulesToTick.forEach((module) => module.tick(start, start - lastTime));
   lastTime = start;
 
   // Set timeout for remaining tick time, or immediately if the module went
   // over.
-  var tickTime = time.now() - start;
+  let tickTime = time.now() - start;
   if (tickTime > interval) {
-    debug('Module tick() took too long: ' + tickTime + 'ms out of ' +
-          interval + 'ms.');
+    debug(`Module tick() took too long: ${tickTime}ms out of ${interval}ms.`);
   }
   setTimeout(tick, Math.max(interval - tickTime, 0));
 }
 tick();
 
 module.exports = {
-  add: function(module, globals) {
+  add: (module, globals) => {
     if (module.instance) {
       modulesToTick.push(module);
-      debug(
-          'Add: We are now ticking ' + modulesToTick.length + ' modules:',
+      debug(`Add: We are now ticking ${modulesToTick.length} modules:`,
           modulesToTick.map((m) => m.moduleDef.name).join(', '));
       if (modulesToTick.length > 2) {
         debug('FAILED!');
       }
     }
   },
-  remove: function(module) {
+  remove: (module) => {
     modulesToTick = modulesToTick.filter(m => {
       if (m === module) {
         m.dispose();
@@ -60,7 +58,7 @@ module.exports = {
       }
       return true;
     });
-    debug('Remove: We are now ticking ' + modulesToTick.length + ' modules',
+    debug(`Remove: We are now ticking ${modulesToTick.length} modules:`,
         modulesToTick.map((m) => m.moduleDef.name).join(', '));
   }
 };
