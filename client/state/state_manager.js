@@ -12,9 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-'use strict';
 
 define((require) => {
+  'use strict';
   const sharedState = require('lib/shared_state');
   const debug = require('client/util/debug')('wall:state_manager');
 
