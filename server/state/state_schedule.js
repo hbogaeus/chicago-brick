@@ -13,6 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+'use strict';
+
 /**
  * A state machine for the server side of a module that loops through a schedule
  * of states.  Each element of the schedule has a duration and an ending state.
