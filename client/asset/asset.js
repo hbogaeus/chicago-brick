@@ -14,6 +14,8 @@ limitations under the License.
 ==============================================================================*/
 
 define((require) => {
+  'use strict';
+    
   var parsedLocation = require('client/util/location');
 
   const LOCAL_ASSET_PATH = 'http://127.0.0.1:8080/';
