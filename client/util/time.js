@@ -14,6 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 define((require) => {
+  'use strict';
   const clockSkew = require('clock-skew')({});
   const network = require('client/network/network');
   var timeRequester = null;
