@@ -69,7 +69,7 @@ let clientError = (debug) => {
 /**
  * Retrieves a list of recent errors.
  */
-let getRecentErrors = function() {
+let getRecentErrors = () => {
   return recentErrors;
 };
 
