@@ -13,11 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
-  var Rectangle = require('lib/rectangle');
-  var parsedLocation = require('client/util/location');
-  
+  const Rectangle = require('lib/rectangle');
+  const parsedLocation = require('client/util/location');
+
   function readClientRectFromLocation() {
     var config = parsedLocation.config || '';
     var xscale = parsedLocation.xscale || 1;
@@ -31,7 +31,7 @@ define(function(require) {
     }
     return rect;
   }
-  
+
   var ret = {};
   ret.virtualRectNoBezel = readClientRectFromLocation() ||
       new Rectangle(0, 0, 1920, 1080);
