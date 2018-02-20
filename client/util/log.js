@@ -20,6 +20,7 @@ limitations under the License.
  */
 
 define((require) => {
+  'use strict';
   const network = require('client/network/network');
 
   return {
