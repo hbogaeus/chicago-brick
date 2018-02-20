@@ -14,6 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 define((require) => {
+  'use strict';
   const Rectangle = require('lib/rectangle');
   const parsedLocation = require('client/util/location');
 
