@@ -4,7 +4,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,50 +13,55 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define(require => {
+  'use strict';
   const Surface = require('client/surface/surface');
 
-  const CanvasSurface = function(container, wallGeometry) {
-    Surface.call(this, container, wallGeometry);
+  class CanvasSurface extends Surface {
 
-    this.canvas = document.createElement('canvas');
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.left = 0;
-    this.canvas.style.right = 0;
-    this.canvas.style.top = 0;
-    this.canvas.style.bottom = 0;
-    this.canvas.style.padding = 0;
-    this.canvas.style.margin = 0;
+    constructor(container, wallGeometry) {
+      super(container, wallGeometry);
 
-    this.canvas.setAttribute('width', this.virtualRect.w);
-    this.canvas.setAttribute('height', this.virtualRect.h);
+      this.canvas = document.createElement('canvas');
+      this.canvas.style.position = 'absolute';
+      this.canvas.style.left = 0;
+      this.canvas.style.right = 0;
+      this.canvas.style.top = 0;
+      this.canvas.style.bottom = 0;
+      this.canvas.style.padding = 0;
+      this.canvas.style.margin = 0;
 
-    container.appendChild(this.canvas);
+      this.canvas.setAttribute('width', this.virtualRect.w);
+      this.canvas.setAttribute('height', this.virtualRect.h);
 
-    this.context = this.canvas.getContext('2d');
+      container.appendChild(this.canvas);
 
-  };
-  CanvasSurface.prototype = Object.create(Surface.prototype);
+      this.context = this.canvas.getContext('2d');
 
-  CanvasSurface.prototype.destroy = function() {
-    this.canvas.remove();
-    this.canvas = null;
-  };
+    }
 
-  CanvasSurface.prototype.pushOffset = function() {
-    this.context.save();
-    this.applyOffset();
-  };
+    destroy() {
+      this.canvas.remove();
+      this.canvas = null;
+    }
 
-  CanvasSurface.prototype.applyOffset = function() {
-    this.context.translate(-this.virtualRect.x, -this.virtualRect.y);
-  };
+    pushOffset() {
+      this.context.save();
+      this.applyOffset();
+    }
 
-  CanvasSurface.prototype.popOffset = function() { this.context.restore(); };
+    applyOffset() {
+      this.context.translate(-this.virtualRect.x, -this.virtualRect.y);
+    }
 
-  CanvasSurface.prototype.setOpacity = function(alpha) {
-    this.canvas.style.opacity = alpha;
-  };
+    popOffset() {
+      this.context.restore();
+    }
 
-  return CanvasSurface;
-});
+    setOpacity(alpha) {
+      this.canvas.style.opacity = alpha;
+    }
+  }
+    return CanvasSurface;
+
+  });
