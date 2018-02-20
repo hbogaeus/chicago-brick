@@ -13,9 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function() {
+define(() => {
   'use strict';
-  return location.search.substr(1).split(/&/g).reduce(function(obj, pair) {
+  
+  return location.search.substr(1).split(/&/g).reduce((obj, pair) => {
     var bits = pair.split('=');
     var key = bits.shift();
     obj[key] = decodeURIComponent(bits.join('='));
