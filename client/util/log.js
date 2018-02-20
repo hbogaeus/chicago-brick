@@ -18,7 +18,6 @@ limitations under the License.
  * provided by the standard debug module.
  * Recorded errors are sent to the server.
  */
-
 define((require) => {
   'use strict';
   const network = require('client/network/network');
