@@ -22,7 +22,6 @@ limitations under the License.
  *
  * Expose `debug()` as the module.
  */
-
 exports = module.exports = debug;
 exports.coerce = coerce;
 exports.disable = disable;
@@ -33,7 +32,6 @@ exports.humanize = require('ms');
 /**
  * The currently active debug mode names, and names to skip.
  */
-
 exports.names = [];
 exports.skips = [];
 
@@ -42,19 +40,16 @@ exports.skips = [];
  *
  * Valid key names are a single, lowercased letter, i.e. "n".
  */
-
 exports.formatters = {};
 
 /**
  * Previously assigned color.
  */
-
 var prevColor = 0;
 
 /**
  * Previous log timestamp.
  */
-
 var prevTime;
 
 /**
@@ -63,7 +58,6 @@ var prevTime;
  * @return {Number}
  * @api private
  */
-
 function selectColor() {
   return exports.colors[prevColor++ % exports.colors.length];
 }
@@ -75,7 +69,6 @@ function selectColor() {
  * @return {Function}
  * @api public
  */
-
 function debug(namespace) {
 
   // define the `disabled` version
@@ -97,8 +90,12 @@ function debug(namespace) {
     prevTime = curr;
 
     // add the `color` if not set
-    if (null == self.useColors) self.useColors = exports.useColors();
-    if (null == self.color && self.useColors) self.color = selectColor();
+    if (null == self.useColors) {
+      self.useColors = exports.useColors();
+    }
+    if (null == self.color && self.useColors) {
+      self.color = selectColor();
+    }
 
     var args = Array.prototype.slice.call(arguments);
 
@@ -111,9 +108,12 @@ function debug(namespace) {
 
     // apply any `formatters` transformations
     var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
+    args[0] = args[0].replace(/%([a-z%])/g, (match, format) => {
       // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
+      if (match === '%%') {
+        return match;
+      }
+
       index++;
       var formatter = exports.formatters[format];
       if ('function' === typeof formatter) {
@@ -149,15 +149,17 @@ function debug(namespace) {
  * @param {String} namespaces
  * @api public
  */
-
 function enable(namespaces) {
   exports.save(namespaces);
 
   var split = (namespaces || '').split(/[\s,]+/);
-  var len = split.length;
+  let len = split.length;
 
-  for (var i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
+  for (let i = 0; i < len; i++) {
+    if (!split[i]) {
+      continue; // ignore empty strings
+    }
+
     namespaces = split[i].replace(/\*/g, '.*?');
     if (namespaces[0] === '-') {
       exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
@@ -172,7 +174,6 @@ function enable(namespaces) {
  *
  * @api public
  */
-
 function disable() {
   exports.enable('');
 }
@@ -184,15 +185,14 @@ function disable() {
  * @return {Boolean}
  * @api public
  */
-
 function enabled(name) {
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
+  var len;
+  for (let i = 0, len = exports.skips.length; i < len; i++) {
     if (exports.skips[i].test(name)) {
       return false;
     }
   }
-  for (i = 0, len = exports.names.length; i < len; i++) {
+  for (let i = 0, len = exports.names.length; i < len; i++) {
     if (exports.names[i].test(name)) {
       return true;
     }
@@ -207,22 +207,22 @@ function enabled(name) {
  * @return {Mixed}
  * @api private
  */
-
 function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
+  if (val instanceof Error) {
+    return val.stack || val.message;
+  }
   return val;
 }
 
-},{"ms":2}],2:[function(require,module,exports){
+},{"ms":2}],2:[(require, module, exports) => {
 /**
- * Helpers.
+ * Constant helpers.
  */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
+const SECONDS = 1000;
+const MINUTES = SECONDS * 60;
+const HOURS = MINUTES * 60;
+const DAYS = HOURS * 24;
+const YEARS = DAYS * 365.25;
 
 /**
  * Parse or format the given `val`.
@@ -232,14 +232,14 @@ var y = d * 365.25;
  *  - `long` verbose formatting [false]
  *
  * @param {String|Number} val
- * @param {Object} options
+ * @param {Object=} options
  * @return {String|Number}
  * @api public
  */
-
-module.exports = function(val, options){
-  options = options || {};
-  if ('string' == typeof val) return parse(val);
+module.exports = function(val, options = {}) {
+  if ('string' == typeof val) {
+    return parse(val);
+  }
   return options.long
     ? long(val)
     : short(val);
@@ -252,12 +252,17 @@ module.exports = function(val, options){
  * @return {Number}
  * @api private
  */
-
 function parse(str) {
   str = '' + str;
-  if (str.length > 10000) return;
+  if (str.length > 10000) {
+    return;
+  }
+
   var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-  if (!match) return;
+  if (!match) {
+    return;
+  }
+
   var n = parseFloat(match[1]);
   var type = (match[2] || 'ms').toLowerCase();
   switch (type) {
@@ -266,29 +271,34 @@ function parse(str) {
     case 'yrs':
     case 'yr':
     case 'y':
-      return n * y;
+      return n * YEARS;
+
     case 'days':
     case 'day':
     case 'd':
-      return n * d;
+      return n * DAYS;
+
     case 'hours':
     case 'hour':
     case 'hrs':
     case 'hr':
     case 'h':
-      return n * h;
+      return n * HOURS;
+
     case 'minutes':
     case 'minute':
     case 'mins':
     case 'min':
     case 'm':
-      return n * m;
+      return n * MINUTES;
+
     case 'seconds':
     case 'second':
     case 'secs':
     case 'sec':
     case 's':
-      return n * s;
+      return n * SECONDS;
+
     case 'milliseconds':
     case 'millisecond':
     case 'msecs':
@@ -305,12 +315,19 @@ function parse(str) {
  * @return {String}
  * @api private
  */
-
 function short(ms) {
-  if (ms >= d) return Math.round(ms / d) + 'd';
-  if (ms >= h) return Math.round(ms / h) + 'h';
-  if (ms >= m) return Math.round(ms / m) + 'm';
-  if (ms >= s) return Math.round(ms / s) + 's';
+  if (ms >= DAYS) {
+    return Math.round(ms / DAYS) + 'd';
+  }
+  if (ms >= HOURS) {
+    return Math.round(ms / HOURS) + 'h';
+  }
+  if (ms >= MINUTES) {
+    return Math.round(ms / MINUTES) + 'm';
+  }
+  if (ms >= SECONDS) {
+    return Math.round(ms / SECONDS) + 's';
+  }
   return ms + 'ms';
 }
 
@@ -321,33 +338,34 @@ function short(ms) {
  * @return {String}
  * @api private
  */
-
 function long(ms) {
-  return plural(ms, d, 'day')
-    || plural(ms, h, 'hour')
-    || plural(ms, m, 'minute')
-    || plural(ms, s, 'second')
+  return plural(ms, DAYS, 'day')
+    || plural(ms, HOURS, 'hour')
+    || plural(ms, MINUTES, 'minute')
+    || plural(ms, SECONDS, 'second')
     || ms + ' ms';
 }
 
 /**
  * Pluralization helper.
  */
-
 function plural(ms, n, name) {
-  if (ms < n) return;
-  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
+  if (ms < n) {
+    return;
+  }
+  if (ms < n * 1.5) {
+    return Math.floor(ms / n) + ' ' + name;
+  }
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],3:[function(require,module,exports){
+},{}],3:[(require, module, exports) => {
 
 /**
  * This is the web browser implementation of `debug()`.
  *
  * Expose `debug()` as the module.
  */
-
 exports = module.exports = require('./debug');
 exports.log = log;
 exports.formatArgs = formatArgs;
@@ -362,7 +380,6 @@ exports.storage = 'undefined' != typeof chrome
 /**
  * Colors.
  */
-
 exports.colors = [
   'lightseagreen',
   'forestgreen',
@@ -379,7 +396,6 @@ exports.colors = [
  *
  * TODO: add a `localStorage` variable to explicitly enable/disable colors
  */
-
 function useColors() {
   // is webkit? http://stackoverflow.com/a/16459606/376773
   return ('WebkitAppearance' in document.documentElement.style) ||
@@ -393,7 +409,6 @@ function useColors() {
 /**
  * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
  */
-
 exports.formatters.j = function(v) {
   return JSON.stringify(v);
 };
@@ -404,7 +419,6 @@ exports.formatters.j = function(v) {
  *
  * @api public
  */
-
 function formatArgs() {
   var args = arguments;
   var useColors = this.useColors;
@@ -416,7 +430,9 @@ function formatArgs() {
     + (useColors ? '%c ' : ' ')
     + '+' + exports.humanize(this.diff);
 
-  if (!useColors) return args;
+  if (!useColors) {
+    return args;
+  }
 
   var c = 'color: ' + this.color;
   args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
@@ -426,8 +442,11 @@ function formatArgs() {
   // figure out the correct index to insert the CSS into
   var index = 0;
   var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
+  args[0].replace(/%[a-z%]/g, (match) => {
+    if ('%%' === match) {
+      return;
+    }
+
     index++;
     if ('%c' === match) {
       // we only are interested in the *last* %c
@@ -446,7 +465,6 @@ function formatArgs() {
  *
  * @api public
  */
-
 function log() {
   // this hackery is required for IE8/9, where
   // the `console.log` function doesn't have 'apply'
@@ -461,7 +479,6 @@ function log() {
  * @param {String} namespaces
  * @api private
  */
-
 function save(namespaces) {
   try {
     if (null == namespaces) {
@@ -469,7 +486,9 @@ function save(namespaces) {
     } else {
       exports.storage.debug = namespaces;
     }
-  } catch(e) {}
+  } catch(e) {
+    // Code should never be reached
+  }
 }
 
 /**
@@ -478,36 +497,36 @@ function save(namespaces) {
  * @return {String} returns the previously persisted debug modes
  * @api private
  */
-
 function load() {
   var r;
   try {
     r = exports.storage.debug;
-  } catch(e) {}
+  } catch(e) {
+    // Code should never be reached
+  }
   return r;
 }
 
 /**
  * Enable namespaces listed in `localStorage.debug` initially.
  */
-
 exports.enable(load());
 
 /**
  * Localstorage attempts to return the localstorage.
  *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
+ * This is necessary because safari throws when a user disables
+ * cookies/localstorage and you attempt to access it.
  *
  * @return {LocalStorage}
  * @api private
  */
-
 function localstorage(){
   try {
     return window.localStorage;
-  } catch (e) {}
+  } catch (e) {
+    // Code should never be reached
+  }
 }
 
 },{"./debug":1}]},{},[3])(3)

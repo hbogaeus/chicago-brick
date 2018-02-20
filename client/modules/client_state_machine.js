@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
   require('lib/promise');
 
@@ -37,16 +37,16 @@ define(function(require) {
 
       // Currently showing...
       this.oldModule_ = oldModule;
-      
+
       // Next one to get ready.
       this.module_ = module;
-      
+
       // Set to true when the module is fully instantiated.
       this.moduleIsReady_ = false;
-      
+
       // Set to true if a request to transition away has occurred.
       this.willTransitionAway_ = false;
-      
+
       // Timer
       this.timer_ = null;
     }
@@ -59,10 +59,10 @@ define(function(require) {
         }});
       }
       this.transition_ = transition;
-      
+
       // First, tell the old module that we're going to hide it.
       this.oldModule_.willBeHiddenSoon();
-      
+
       // Tell the new module to instantiate, which may require loading deps.
       let moduleDone = this.module_.instantiate().then(() => {
         if (this.willTransitionAway_) {
@@ -74,16 +74,16 @@ define(function(require) {
         if (!this.module_.willBeShownSoon()) {
           // Error in new module code...We can't go back to just
           // displaying the old module because we already told it we'll be done
-          // with it soon. Instead, clean up, then pass control back to the 
+          // with it soon. Instead, clean up, then pass control back to the
           // machine via its error handler.
           this.module_.dispose();
           throw new Error(`Failed to prepare from ${this.oldModule_.name} to ${this.module_.name}`);
         }
         this.moduleIsReady_ = true;
       });
-      
+
       // Tell the modules that we're going to switch soon.
-      debug('Delaying in prepare state for ' + timeManager.until(this.module_.deadline));
+      debug(`Delaying in prepare state for ${timeManager.until(this.module_.deadline)}`);
       this.timer_ = setTimeout(() => {
         if (!this.module_.instance) {
           debug('Attempted to transition to module that did not init in time!');
@@ -99,8 +99,8 @@ define(function(require) {
     }
     playModule(module) {
       this.willTransitionAway_ = true;
-      
-      // Suddenly, we aren't going to be fading from old -> current, and should 
+
+      // Suddenly, we aren't going to be fading from old -> current, and should
       // instead be showing new. But we've already told old and current to get
       // ready to be hidden & shown (and old is likely still ticking). We should
       // immediately tell current that it's going to be hidden, and then dispose
@@ -116,7 +116,7 @@ define(function(require) {
       } else {
         // Happened before enter, even. No work to do.
       }
-      
+
       this.transition_(new PrepareState(this.oldModule_, module));
     }
   }
@@ -136,7 +136,7 @@ define(function(require) {
       // If while in the middle of a transition, we get a request to go
       // somewhere else, we save that, and do so asap.
       this.savedModule_ = null;
-      
+
       // Timer.
       this.timer_ = null;
     }
@@ -151,7 +151,7 @@ define(function(require) {
           deadline: fadeDeadline
         }});
       }
-      
+
       // Start the transition!
       this.oldModule_.fadeOut(fadeDeadline);
       if (!this.module_.fadeIn(fadeDeadline)) {
@@ -208,7 +208,7 @@ define(function(require) {
     constructor() {
       // Initially, we tell the clients to show a blank screen.
       super(new DisplayState(ClientModule.newEmptyModule()), debug);
-      
+
       this.setErrorListener(error => {
         if (monitor.isEnabled()) {
           monitor.update({client: {
@@ -217,7 +217,7 @@ define(function(require) {
             color: [255, 0, 0]
           }});
         }
-        
+
         logError(error);
       });
     }
@@ -229,7 +229,7 @@ define(function(require) {
           deadline: module.deadline
         }});
       }
-      
+
       debug('Requested transition to module', module.name);
       // Transition according to current state rules.
       this.state.playModule(module);

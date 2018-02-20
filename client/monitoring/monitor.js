@@ -13,38 +13,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
-  
+
   const network = require('client/network/network');
   const time = require('client/util/time');
-  
+
   // The monitor in the client displays up-to-date information about what the
   // server is doing. It's designed as a debugging tool.
   // TODO(applmak): Enable showing the monitor without needing to reload the
   // web browser.
-  
+
   class ServerState {
     constructor() {
       this.playlistEvents = [];
       this.moduleSm = [];
       this.serverSm = [];
       this.layoutSm = [];
-      
+
       this.interrupts = [];
     }
   }
-  
+
   class ClientState {
     constructor() {
       this.smEvents = [];
       this.modulesToDraw = [];
     }
   }
-  
-  let serverState = new ServerState;
-  let clientState = new ClientState;
-  
+
+  let serverState = new ServerState();
+  let clientState = new ClientState();
+
   let handleModelChange = change => {
     if (change.layout) {
       serverState.layoutSm.push(change.layout);
@@ -64,23 +64,23 @@ define(function(require) {
       serverState.interrupts = change.interrupts;
     }
   };
-  
+
   let handleManyModelChanges = changes => changes.length ? changes.forEach(handleModelChange) : handleModelChange(changes);
-  
+
   let watchForModelChanges = () => {
     // Open connection to the server, monitor for updates to the model.
     network.send('enable-monitoring');
     network.on('monitor', handleManyModelChanges);
-  }
-  
+  };
+
   let stopWatchingModelChanges = () => {
     network.send('disable-monitoring');
     network.removeListener('monitor', handleManyModelChanges);
-  }
-  
+  };
+
   let enabled = false;
   let monitoringElement;
-  
+
   let createMonitoringLayer = () => {
     let l = document.createElement('div');
     l.className = 'monitor';
@@ -89,20 +89,20 @@ define(function(require) {
     // Our UI presents time as moving from left to right, with a camera that
     // attempts to keep the time beam in the middle of the screen, so that
     // all of the views seem to move from the right to the left.
-    
+
     let beam = document.createElement('div');
     beam.className = 'beam';
-    
+
     // Every state machine gets its own horizontal stripe across the whole view,
     // gravity towards the bottom, with layout sm on the bottom, module sm next,
     // server sm next, then client-local sm next. Every transition is marked as
     // a line across the box at a specific timestamp. The name of the demarcated
     // states are always visible. Each state machine might move through time at
     // a different rate in order to show known upcoming layout changes.
-    
+
     let timeLabels = document.createElement('div');
     timeLabels.className = 'time-label';
-    
+
     let earliestTime = document.createElement('span');
     earliestTime.className = 'label early';
     let nowTime = document.createElement('span');
@@ -112,57 +112,57 @@ define(function(require) {
     timeLabels.appendChild(earliestTime);
     timeLabels.appendChild(nowTime);
     timeLabels.appendChild(latestTime);
-    
+
     let playlist = document.createElement('div');
     playlist.className = 'playlist timeline';
     playlist.textContent = 'Playlist';
     let playlistCanvas = document.createElement('canvas');
     playlist.appendChild(playlistCanvas);
-    
+
     let layoutSM = document.createElement('div');
     layoutSM.className = 'layout-sm timeline';
     layoutSM.textContent = 'Layout';
     let layoutSMCanvas = document.createElement('canvas');
     layoutSM.appendChild(layoutSMCanvas);
-    
+
     let moduleSM = document.createElement('div');
     moduleSM.className = 'module-sm timeline';
     moduleSM.textContent = 'Module';
     let moduleSMCanvas = document.createElement('canvas');
     moduleSM.appendChild(moduleSMCanvas);
-    
+
     let serverSM = document.createElement('div');
     serverSM.className = 'server-sm timeline';
     serverSM.textContent = 'Server';
     let serverSMCanvas = document.createElement('canvas');
     serverSM.appendChild(serverSMCanvas);
-    
+
     let clientSM = document.createElement('div');
     clientSM.className = 'client-sm timeline';
     clientSM.textContent = 'Client';
     let clientSMCanvas = document.createElement('canvas');
     clientSM.appendChild(clientSMCanvas);
-    
+
     // On top of that, there's a line graph (that syncs up with the
-    // timeline of the client-local graph) which contains information about 
+    // timeline of the client-local graph) which contains information about
     // frame timing (one frame per pixel, probs), and a graph of a windowed
     // version of that data over the last N frames.
-      
+
     let instantFps = document.createElement('div');
     instantFps.className = 'instant timeline';
     instantFps.textContent = 'FPS';
     let instantFpsCanvas = document.createElement('canvas');
     instantFps.appendChild(instantFpsCanvas);
-    
+
     let timeDrift = document.createElement('div');
     timeDrift.className = 'time-drift timeline';
     timeDrift.textContent = 'Sync';
     let timeDriftCanvas = document.createElement('canvas');
     timeDrift.appendChild(timeDriftCanvas);
-    
+
     let modulesToDrawDiv = document.createElement('div');
     modulesToDrawDiv.className = 'modules-to-draw';
-    
+
     // Add top-to-bottom:
     l.appendChild(timeDrift);
     l.appendChild(instantFps);
@@ -172,14 +172,14 @@ define(function(require) {
     l.appendChild(layoutSM);
     l.appendChild(playlist);
     l.appendChild(timeLabels);
-    
+
     l.appendChild(beam);
 
     l.appendChild(modulesToDrawDiv);
 
     return l;
   };
-  
+
   class CircularBuffer {
     constructor(size, arrayType) {
       this.data = new arrayType(size);
@@ -206,8 +206,8 @@ define(function(require) {
       for (let i = start; i < Math.min(start + N, this.capacity); ++i) {
         yield this.data[i];
       }
-      
-      // Now, if end <= start 
+
+      // Now, if end <= start
       if (start + N > this.capacity) {
         let end = start + N - this.capacity;
         for (let i = 0; i < end; ++i) {
@@ -229,7 +229,7 @@ define(function(require) {
       }
     }
   }
-  
+
   class Canvas {
     constructor(canvas) {
       if (!canvas.positioned) {
@@ -237,15 +237,15 @@ define(function(require) {
         canvas.height = canvas.parentNode.clientHeight;
         canvas.positioned = true;
       }
-      
+
       this.canvas = canvas;
-      
+
       // TODO(applmak): Enable this for high-dpi devices, and fix the display.
       // let ratio = window.devicePixelRatio;
       // let {left, top, bottom, right} = this.canvas.getBoundingClientRect();
       // canvas.width = Math.floor(right * ratio) - Math.floor(left * ratio);
       // canvas.height = Math.floor(bottom * ratio) - Math.floor(top * ratio);
-      
+
       this.width = canvas.width;
       this.height = canvas.height;
       this.c = canvas.getContext('2d');
@@ -316,24 +316,24 @@ define(function(require) {
       // Convert to frame space to do make the arrow fans.
       deltaX *= this.scaleX(1);
       deltaY *= this.scaleY(1);
-      
+
       let l = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       deltaX *= fanLength / l;
       deltaY *= fanLength / l;
-      
+
       let p1x = Math.cos(fanAngle) * deltaX + Math.sin(fanAngle) * deltaY;
       let p1y = -Math.sin(fanAngle) * deltaX + Math.cos(fanAngle) * deltaY;
-      
+
       let p2x = Math.cos(-fanAngle) * deltaX + Math.sin(-fanAngle) * deltaY;
       let p2y = -Math.sin(-fanAngle) * deltaX + Math.cos(-fanAngle) * deltaY;
-      
+
       // Convert back to data space.
       p1x /= this.scaleX(1);
       p1y /= this.scaleY(1);
-      
+
       p2x /= this.scaleX(1);
       p2y /= this.scaleY(1);
-      
+
       this.strokeGeneratedPath([[x1, y1], [x2, y2], [x2+p1x, y2+p1y], [x2, y2], [x2+p2x, y2+p2y]]);
     }
     static calculateBounds(data) {
@@ -350,7 +350,7 @@ define(function(require) {
       return ret;
     }
   }
-  
+
   class StateTimeline {
     constructor(canvas) {
       this.canvas = new Canvas(canvas);
@@ -366,7 +366,7 @@ define(function(require) {
       this.canvas.font('12pt monospace', 'bolder');
 
       // Draw oldest state.
-      let oldestState = events.filter(e => e.state).shift();      
+      let oldestState = events.filter(e => e.state).shift();
       if (oldestState && oldestState.time <= earlyTime) {
         this.oldestState = oldestState;
       }
@@ -375,7 +375,7 @@ define(function(require) {
         this.canvas.text(this.oldestState.state, earlyTime + 2, 0.5, 'middle');
       }
 
-      let oldestEvent = events.filter(e => e.event).shift();      
+      let oldestEvent = events.filter(e => e.event).shift();
       if (oldestEvent && oldestEvent.time <= earlyTime) {
         this.oldestEvent = oldestEvent;
       }
@@ -385,13 +385,13 @@ define(function(require) {
       }
 
       let labelSlotsEnds = [0, 0];
-    
+
       let pickASlot = () => {
         let slots = labelSlotsEnds.map((v, i) => ({v, i}));
         slots.sort((a, b) => a.v - b.v);
         return slots.shift();
-      }
-    
+      };
+
       return events.filter(e => {
         // There are two kinds of events: Ones with 'state' and ones without.
         if (e.state) {
@@ -400,11 +400,11 @@ define(function(require) {
 
           let x = e.time;
           if ('deadline' in e) {
-            this.canvas.strokeArrow(e.time, .1, e.deadline, 0.1, 5);
+            this.canvas.strokeArrow(e.time, 0.1, e.deadline, 0.1, 5);
             x = (e.time + e.deadline) * 0.5;
           }
           this.canvas.strokeGeneratedPath([[e.time, 0.0], [e.time, 1.0]]);
-          
+
           // Text describing the state.
           let state = e.state.replace(/State$/, '');
           this.canvas.text(state, x, 1/6.0, 'middle');
@@ -413,10 +413,10 @@ define(function(require) {
             this.canvas.strokeStyle(100, 100, 100);
             this.canvas.strokeArrow(e.time, 0.5, e.deadline, 0.5, 5);
           }
-          
+
           let bestSlot = pickASlot();
           let y = 1.0/6 * ((bestSlot.i+1) * 2 + 1);
-        
+
           let color = e.color || [255, 255, 160];
           this.canvas.strokeStyle(...color);
           this.canvas.fillStyle(...color);
@@ -424,7 +424,7 @@ define(function(require) {
           let measurement = this.canvas.text(e.event, e.time, y, 'middle');
           labelSlotsEnds[bestSlot.i] = this.canvas.convertX(e.time) + measurement.width + 2;
         }
-      
+
         if ('deadline' in e) {
           return e.deadline >= earlyTime;
         } else {
@@ -433,7 +433,7 @@ define(function(require) {
       });
     }
   }
-  
+
   function* izip(a, b) {
     if (!a.next) {
       a = a[Symbol.iterator]();
@@ -446,15 +446,13 @@ define(function(require) {
       yield [aVal.value, bVal.value];
     }
   }
-  
+
   function* allNumbers() {
     for (let i = 0;; ++i) {
       yield i;
     }
   }
-  
-  let lastT = 0;
-  
+
   let localFrameTimes, syncedFrameTimes, localTimeDeltas, syncedTimeDeltas;
   let driftDeltaTimes;
   let clientSmTimeline, serverSmTimeline, moduleSmTimeline, layoutSmTimeline, playlistTimeline;
@@ -462,16 +460,16 @@ define(function(require) {
     let now = time.now();
     let width = monitoringElement.offsetWidth;
     // Assume 60 fps, assume 1 frame of data per pixel.
-    
+
     if (!localFrameTimes) {
       localFrameTimes = new CircularBuffer(width/2, Float32Array);
       syncedFrameTimes = new CircularBuffer(width/2, Float32Array);
       localTimeDeltas = new CircularBuffer(width/2, Float32Array);
       syncedTimeDeltas = new CircularBuffer(width/2, Float32Array);
-      
+
       driftDeltaTimes = new CircularBuffer(width/2, Float32Array);
     }
-    
+
     // Update fps
     localFrameTimes.push(performance.now());
     syncedFrameTimes.push(now);
@@ -484,7 +482,7 @@ define(function(require) {
       let [oldT, newT] = syncedFrameTimes.last(2);
       syncedTimeDeltas.push(newT - oldT);
     }
-    
+
     let instantFpsCanvas = new Canvas(monitoringElement.querySelector('.instant.timeline canvas'));
     instantFpsCanvas.clear();
     {
@@ -494,7 +492,7 @@ define(function(require) {
       bounds.range.max = Math.max(Math.min(bounds.range.max, 100), 20);
       instantFpsCanvas.bounds = bounds;
     }
-    
+
     // Really, anything < 17ms is probably fine.
     instantFpsCanvas.fillStyle(0, 255, 0, 0.2);
     instantFpsCanvas.fillRect(0, instantFpsCanvas.convertY(0), instantFpsCanvas.width/2, instantFpsCanvas.convertY(17) - instantFpsCanvas.convertY(0));
@@ -504,8 +502,8 @@ define(function(require) {
     // Stuff > 34 is not fine.
     instantFpsCanvas.fillStyle(255, 0, 0, 0.2);
     instantFpsCanvas.fillRect(0, instantFpsCanvas.convertY(34), instantFpsCanvas.width/2, instantFpsCanvas.convertY(instantFpsCanvas.bounds.range.max) - instantFpsCanvas.convertY(34));
-            
-    // We want 1 pixel per 16.666ms, so we'll convert the whole range into 
+
+    // We want 1 pixel per 16.666ms, so we'll convert the whole range into
     // 60fps slices, and map THAT onto pixels.
     let graphWidth = (instantFpsCanvas.bounds.domain.max - instantFpsCanvas.bounds.domain.min) / 1000 * 60;
     instantFpsCanvas.frame.domain.min = Math.floor(instantFpsCanvas.width / 2) - graphWidth;
@@ -513,16 +511,16 @@ define(function(require) {
 
     instantFpsCanvas.strokeStyle(255, 255, 127);
     instantFpsCanvas.strokeGeneratedPath(izip(localFrameTimes, localTimeDeltas));
-    
+
     // Update drift
     if (localTimeDeltas.size) {
       let a = [...localTimeDeltas.last(1)][0];
       let b = [...syncedTimeDeltas.last(1)][0];
       driftDeltaTimes.push(b - a);
-      
+
       let clockDriftCanvas = new Canvas(monitoringElement.querySelector('.time-drift.timeline canvas'));
       clockDriftCanvas.clear();
-      
+
       clockDriftCanvas.bounds = {domain: {min: 0, max: driftDeltaTimes.length}, range: {min: -33, max: 33}};
       clockDriftCanvas.frame.domain.min = clockDriftCanvas.width/2 - driftDeltaTimes.length;
       clockDriftCanvas.frame.domain.max = clockDriftCanvas.width/2;
@@ -530,27 +528,27 @@ define(function(require) {
       // Draw 1 frame zone.
       clockDriftCanvas.fillStyle(0, 255, 0, 0.2);
       clockDriftCanvas.fillRect(0, clockDriftCanvas.convertY(-16), clockDriftCanvas.width/2, clockDriftCanvas.convertY(16) - clockDriftCanvas.convertY(-16));
-      
+
       // Draw axes.
       clockDriftCanvas.strokeStyle(255, 255, 255, 0.2);
       clockDriftCanvas.strokeGeneratedPath([[0, 0], [driftDeltaTimes.length, 0]]);
-      
+
       clockDriftCanvas.strokeStyle(255, 255, 255, 1.0);
       clockDriftCanvas.strokeGeneratedPath(izip(allNumbers(), driftDeltaTimes));
     }
-    
+
     // Calculate time bounds:
     let timeWidth = width / 1 / 60.0 * 1000.0;
-    
+
     let earlyTime = now - timeWidth / 2;
     let lateTime = now + timeWidth / 2;
-    
+
     // Update client local sm
     if (!clientSmTimeline) {
       clientSmTimeline = new StateTimeline(monitoringElement.querySelector('.client-sm.timeline canvas'));
     }
     clientState.smEvents = clientSmTimeline.draw(clientState.smEvents, earlyTime, lateTime);
-    
+
     // Update server server sm
     if (!serverSmTimeline) {
       serverSmTimeline = new StateTimeline(monitoringElement.querySelector('.server-sm.timeline canvas'));
@@ -567,19 +565,19 @@ define(function(require) {
     if (!layoutSmTimeline) {
       layoutSmTimeline = new StateTimeline(monitoringElement.querySelector('.layout-sm.timeline canvas'));
     }
-    serverState.layoutSm = layoutSmTimeline.draw(serverState.layoutSm, earlyTime, lateTime);    
-    
+    serverState.layoutSm = layoutSmTimeline.draw(serverState.layoutSm, earlyTime, lateTime);
+
     // Update server playlist
     if (!playlistTimeline) {
       playlistTimeline = new StateTimeline(monitoringElement.querySelector('.playlist.timeline canvas'));
     }
-    serverState.playlistEvents = playlistTimeline.draw(serverState.playlistEvents, earlyTime, lateTime);    
-    
+    serverState.playlistEvents = playlistTimeline.draw(serverState.playlistEvents, earlyTime, lateTime);
+
     // Update the time labels.
     monitoringElement.querySelector('.label.early').textContent = (earlyTime / 1000).toFixed(1);
     monitoringElement.querySelector('.label.now').textContent = (now / 1000).toFixed(1);
     monitoringElement.querySelector('.label.late').textContent = (lateTime / 1000).toFixed(1);
-    
+
     // Update drawn modules.
     monitoringElement.querySelector('.modules-to-draw').textContent = clientState.modulesToDraw.join('\n');
 
@@ -587,7 +585,7 @@ define(function(require) {
       window.requestAnimationFrame(updateUI);
     }
   };
-  
+
   return {
     isEnabled() {
       return enabled;

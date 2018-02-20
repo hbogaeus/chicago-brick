@@ -12,18 +12,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-
 'use strict';
 
 const network = require('server/network/network');
 
 let currentStatus = {};
-let sendCurrentState = socket => {
+let sendCurrentState = (socket) => {
   socket.emit('monitor', currentStatus);
 };
 
 let monitoringSockets = [];
-network.on('new-client', info => {
+network.on('new-client', (info) => {
   // Listen for a msg indicating that it would like some monitoring.
   info.socket.on('enable-monitoring', () => {
     monitoringSockets.push(info.socket);
@@ -39,14 +38,14 @@ network.on('new-client', info => {
 
 let enabled = false;
 module.exports = {
-  isEnabled: function() {
+  isEnabled: () => {
     return enabled;
   },
-  enable: function() {
+  enable: () => {
     enabled = true;
     monitoringSockets.forEach(sendCurrentState);
   },
-  update: function(change) {
+  update: (change) => {
     if (enabled) {
       Object.assign(currentStatus, change);
       monitoringSockets.forEach(socket => socket.emit('monitor', change));

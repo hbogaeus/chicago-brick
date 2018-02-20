@@ -15,9 +15,9 @@ limitations under the License.
 
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var creds = {};
+const fs = require('fs');
+const path = require('path');
+let creds = {};
 
 module.exports = {
   get: (name) => {

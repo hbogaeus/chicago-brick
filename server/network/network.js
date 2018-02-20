@@ -27,27 +27,26 @@ limitations under the License.
 //   client fails to do this, the client is considered invalid and omitted from
 //   future calculations.
 
-var socketio = require('socket.io');
-var ioClient = require('socket.io-client');
-var EventEmitter = require('events').EventEmitter;
-var Debug = require('debug');
-var debug = Debug('wall:network');
-var url = require('url');
+const socketio = require('socket.io');
+const ioClient = require('socket.io-client');
+const EventEmitter = require('events').EventEmitter;
+const Debug = require('debug');
+const debug = Debug('wall:network');
+const url = require('url');
 
-var Rectangle = require('lib/rectangle');
-var error = require('server/util/log')
+const Rectangle = require('lib/rectangle');
+const error = require('server/util/log')
     .clientError(Debug('wall:client_error'));
-var time = require('server/util/time');
-var wallGeometry = require('server/util/wall_geometry');
+const time = require('server/util/time');
 
-var io;
+let io;
 
-var network = new EventEmitter;
+let network = new EventEmitter();
 
 function installAlwaysAvailableHandlers(socket) {
   // We listen for the time message and respond with the server's version of
   // that time.
-  socket.on('time', function() {
+  socket.on('time', () => {
     socket.emit('time', time.now());
   });
 }
@@ -61,16 +60,16 @@ class ClientInfo {
 
 function installDisplayClientHandlers(socket) {
   // When the client disconnects, we tell OUR listeners that we lost the client.
-  socket.on('disconnect', function() {
+  socket.on('disconnect', () => {
     debug('Lost a client!', socket.id);
     network.emit('lost-client', socket.id);
   });
 
   // When clients initialize, they tell us their display rect. We deserialize
   // the message and broadcast the result out.
-  socket.once('config-response', function(config) {
+  socket.once('config-response', (config) => {
     debug('Client config:', config);
-    var rect = Rectangle.deserialize(config);
+    let rect = Rectangle.deserialize(config);
     if (!rect) {
       console.error('Bad client config! ', config);
       return;
@@ -78,25 +77,25 @@ function installDisplayClientHandlers(socket) {
     network.emit('new-client', new ClientInfo(rect, socket));
   });
 
-  socket.on('record-error', function(e) {
+  socket.on('record-error', (e) => {
     error(e);
   });
 }
 
 // Opens a listening websocket by taking a server instance (from the 'http'
 // package) OR a simple port (for tests).
-network.openWebSocket = function(server) {
+network.openWebSocket = (server) => {
   io = socketio(server);
 
-  io.on('connection', function(socket) {
+  io.on('connection', (socket) => {
     installAlwaysAvailableHandlers(socket);
-    
-    var id = url.parse(socket.request.url, true).query.id;
+
+    let id = url.parse(socket.request.url, true).query.id;
     if (id) {
       // Ignore this, as it's not a main connection.
       return;
     }
-    
+
     debug('New client:', socket.id);
     installDisplayClientHandlers(socket);
     // Tell the clients the whole wall geo.
@@ -105,36 +104,36 @@ network.openWebSocket = function(server) {
 };
 
 // Closes all communication.
-network.close = function() {
+network.close = () => {
   io.close();
   io = undefined;
 };
 
 // Sends a message to all clients.
-network.broadcast = function(msg, data) {
+network.broadcast = (msg, data) => {
   io.emit(msg, data);
 };
 
-network.forModule = function(id) {
-  var externalNspName = `module${id.replace(/[^0-9]/g, 'X')}`;
-  var internalNspName = `/${externalNspName}`;
-  var sockets = [];
-  var clients = [];
+network.forModule = (id) => {
+  let externalNspName = `module${id.replace(/[^0-9]/g, 'X')}`;
+  let internalNspName = `/${externalNspName}`;
+  let sockets = [];
+  let clients = [];
   return {
-    open: function() {
-      debug('Opened per-module socket @ ' + id, internalNspName);
+    open: () => {
+      debug(`Opened per-module socket @ ${id}`, internalNspName);
       console.assert(!io.nsps[internalNspName]);
-      var nsp = io.of(internalNspName);
+      let nsp = io.of(internalNspName);
 
       // Expose ioClient via network module.
-      nsp.openExternalSocket = function(host) {
-        var socket = ioClient(host, {multiplex: false});
+      nsp.openExternalSocket = (host) => {
+        let socket = ioClient(host, {multiplex: false});
         sockets.push(socket);
         return socket;
       };
-      
+
       nsp.on('connection', (socket) => {
-        var rect = Rectangle.deserialize(socket.handshake.query.rect);
+        let rect = Rectangle.deserialize(socket.handshake.query.rect);
         clients.push({socket, rect});
         debug(`Tracking per-module connection ${socket.handshake.query.id} from ${rect.serialize()}`, clients.length);
         socket.on('disconnect', () => {
@@ -144,17 +143,17 @@ network.forModule = function(id) {
           debug(`Tracking per-module disconnect ${socket.handshake.query.id} from ${rect.serialize()}`, clients.length);
         });
       });
-      
-      nsp.getClientsInRect = function(rect) {
+
+      nsp.getClientsInRect = (rect) => {
         return clients.filter((client) => {
           return rect.intersects(client.rect);
         });
       };
-      
+
       return nsp;
     },
-    close: function() {
-      debug('Closed per-module socket @ ' + id);
+    close: () => {
+      debug(`Closed per-module socket @ ${id}`);
       console.assert(io.nsps[internalNspName]);
       io.nsps[internalNspName].removeAllListeners();
       // Clean up any clients left open.

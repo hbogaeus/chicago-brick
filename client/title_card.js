@@ -61,19 +61,19 @@ limitations under the License.
  *     }
  */
 
-define(function(require) {
+define((require) => {
   'use strict';
-  var asset = require('client/asset/asset');
-  var parsedLocation = require('client/util/location');
+  const asset = require('client/asset/asset');
+  const parsedLocation = require('client/util/location');
 
   function makeEmptyTitleCard() {
-    var elem = document.createElement('div');
+    let elem = document.createElement('div');
     elem.id = 'title-card';
     return elem;
   }
 
   function makeDefaultTitleCard(config) {
-    var elem = makeEmptyTitleCard();
+    let elem = makeEmptyTitleCard();
     if (typeof config.title === 'string') {
       elem.innerHTML = `<div>${config.title}</div>
           <div>${config.author}</div>`;
@@ -100,16 +100,16 @@ define(function(require) {
 
     // Creates a global API instance for use by the module code.
     getModuleAPI() {
-      var card = this;
+      let card = this;
       // This is the titleCard API provided to modules.
       return {
         // Creates a custom (empty) card and returns a reference to the caller.
-        useCustomCard: function() {
+        useCustomCard: () => {
           return card.replaceCard_(makeEmptyTitleCard());
         },
         // Creates a standard (config-based) card and returns a reference to the
         // caller.
-        useDefaultCard: function() {
+        useDefaultCard: () => {
           return card.replaceCard_(makeDefaultTitleCard(card.config));
         },
       };

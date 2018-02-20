@@ -13,49 +13,51 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define(require => {
   'use strict';
-  var Surface = require('client/surface/surface');
-  var THREE = require('three');
+  
+  const Surface = require('client/surface/surface');
+  const THREE = require('three');
 
-  var ThreeJsSurface = function(container, wallGeometry, properties) {
-    Surface.call(this, container, wallGeometry);
-    this.renderer = new THREE.WebGLRenderer(properties);
-    this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight);
-    container.appendChild(this.renderer.domElement);
+  class ThreeJsSurface extends Surface {
+    constructor(container, wallGeometry, properties) {
+      super(container, wallGeometry);
+      this.renderer = new THREE.WebGLRenderer(properties);
+      this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight);
+      container.appendChild(this.renderer.domElement);
 
-    this.camera = new THREE.PerspectiveCamera(45, this.wallRect.w / this.wallRect.h, 0.1, 1000);
-    this.scene = new THREE.Scene;
+      this.camera = new THREE.PerspectiveCamera(45, this.wallRect.w / this.wallRect.h, 0.1, 1000);
+      this.scene = new THREE.Scene;
 
-    this.camera.setViewOffset(
-        this.wallRect.w, this.wallRect.h,
-        this.virtualRect.x, this.virtualRect.y,
-        this.virtualRect.w, this.virtualRect.h);
-  };
-  ThreeJsSurface.prototype = Object.create(Surface.prototype);
+      this.camera.setViewOffset(
+          this.wallRect.w, this.wallRect.h,
+          this.virtualRect.x, this.virtualRect.y,
+          this.virtualRect.w, this.virtualRect.h);
+    }
 
-  ThreeJsSurface.prototype.setTileViewOffsetForCamera = function(camera) {
-    var cam = camera || this.camera;
-    cam.setViewOffset(
-        this.wallRect.w, this.wallRect.h,
-        this.virtualRect.x, this.virtualRect.y,
-        this.virtualRect.w, this.virtualRect.h);
-  };
+    setTileViewOffsetForCamera(camera) {
+      const cam = camera || this.camera;
+      cam.setViewOffset(
+          this.wallRect.w, this.wallRect.h,
+          this.virtualRect.x, this.virtualRect.y,
+          this.virtualRect.w, this.virtualRect.h);
+    }
 
-  ThreeJsSurface.prototype.destroy = function() {
-    this.renderer.dispose();
-    this.renderer = null;
-    this.camera = null;
-    this.scene = null;
-  };
+    destroy() {
+      this.renderer.dispose();
+      this.renderer = null;
+      this.camera = null;
+      this.scene = null;
+    }
 
-  ThreeJsSurface.prototype.setOpacity = function(alpha) {
-    this.renderer.domElement.style.opacity = alpha;
-  };
+    setOpacity(alpha) {
+      this.renderer.domElement.style.opacity = alpha;
+    }
 
-  ThreeJsSurface.prototype.render = function() {
-    this.renderer.render(this.scene, this.camera);
-  };
+    render() {
+      this.renderer.render(this.scene, this.camera);
+    }
+  }
 
   return ThreeJsSurface;
 });

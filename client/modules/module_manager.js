@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
 
   const ClientModule = require('client/modules/module');
@@ -24,7 +24,7 @@ define(function(require) {
   class ModuleManager {
     constructor() {
       // The state machine.
-      this.stateMachine = new ClientStateMachine;
+      this.stateMachine = new ClientStateMachine();
     }
     start() {
       timeManager.start();

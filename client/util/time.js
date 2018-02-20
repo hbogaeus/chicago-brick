@@ -13,30 +13,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   'use strict';
-  var clockSkew = require('clock-skew')({});
-
-  var network = require('client/network/network');
-
+  const clockSkew = require('clock-skew')({});
+  const network = require('client/network/network');
   var timeRequester = null;
-  
+
   return {
-    start: function() {
+    start: () => {
       network.on('time', clockSkew.adjustTimeByReference);
       network.send('time');
-      timeRequester = setInterval(function() { network.send('time'); }, 10000);
+      timeRequester = setInterval(() => { network.send('time'); }, 10000);
     },
-    stop: function() {
+    stop: () => {
       network.removeListener('time', clockSkew.adjustTimeByReference);
       clearInterval(timeRequester);
       timeRequester = null;
     },
-    now: function() {
-      return clockSkew.getTime();
-    },
-    until: function(serverDeadline) {
-      return Math.max(0, serverDeadline - clockSkew.getTime());
-    }
+    now: () => clockSkew.getTime(),
+    until: (serverDeadline) => Math.max(0, serverDeadline - clockSkew.getTime())
   };
 });

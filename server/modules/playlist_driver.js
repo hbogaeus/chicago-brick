@@ -18,7 +18,6 @@ limitations under the License.
 const monitor = require('server/monitoring/monitor');
 const random = require('random-js')();
 const time = require('server/util/time');
-const wallGeometry = require('server/util/wall_geometry');
 const debug = require('debug')('wall::playlist_driver');
 
 const makeDriver = layoutSM => {
@@ -34,7 +33,7 @@ const makeDriver = layoutSM => {
   let newLayoutTime = 0;
   // Timestamp of next module change.
   let newModuleTime = Infinity;
-  
+
   let ret = {
     getNextDeadline() {
       return Math.min(newLayoutTime, newModuleTime);
@@ -90,10 +89,10 @@ const makeDriver = layoutSM => {
     nextLayout() {
       // Update layoutIndex.
       layoutIndex = (layoutIndex + 1) % playlist.length;
-      
+
       // Show this layout next:
       let layout = playlist[layoutIndex];
-      
+
       // Reset moduleIndex
       moduleIndex = -1;
 
@@ -129,7 +128,7 @@ const makeDriver = layoutSM => {
 
       // The current layout.
       let layout = playlist[layoutIndex];
-      
+
       // The time that we'll switch to the next module.
       newModuleTime = time.inFuture(layout.moduleDuration * 1000);
 
@@ -147,7 +146,7 @@ const makeDriver = layoutSM => {
         }});
       }
 
-      // Now, in so many seconds, we'll need to switch to another module 
+      // Now, in so many seconds, we'll need to switch to another module
       // or another layout. How much time do we have?
       if (newLayoutTime < newModuleTime) {
         timer = setTimeout(() => ret.nextLayout(), time.until(newLayoutTime));
@@ -157,7 +156,7 @@ const makeDriver = layoutSM => {
     }
   };
   return ret;
-}
+};
 
 module.exports = {
   makeDriver

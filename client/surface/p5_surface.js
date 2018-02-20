@@ -14,7 +14,6 @@ limitations under the License.
 ==============================================================================*/
 
 define(function(require) {
-  'use strict';
   require('p5.dom');
   const Surface = require('client/surface/surface');
   const P5 = require('p5');
@@ -23,9 +22,11 @@ define(function(require) {
   // sketch is the actual p5.js code that will be executed.  sketch.setup() will be called at
   // the end of the wall-provided setup() method and draw() will be invoked as well.
   // sketchArgs will be passed along to the constructor call on providedSketchClass.
+
   class P5Surface extends Surface {
   constructor(container, wallGeometry, providedSketchClass, startTime, sketchConstructorArgs) {
     super(container, wallGeometry);
+
     this.realPixelScalingFactors = {
       x : this.container.offsetWidth / this.virtualRect.w,
       y : this.container.offsetHeight / this.virtualRect.h,

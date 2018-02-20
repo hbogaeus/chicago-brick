@@ -47,7 +47,7 @@ class ModuleLoader {
       return this.loadModule(cfgPath);
     }, (cfg) => {
       if (!cfg.name || (!cfg.extends && !cfg.path)) {
-        debug('Skipping invalid configuration: ' + cfg);
+        debug(`Skipping invalid configuration: ${cfg}`);
         return false;
       }
       return true;
@@ -67,13 +67,13 @@ class ModuleLoader {
         defaultConfig);
 
       if (cfg.extends) {
-        assert(cfg.extends in library.modules, 'Module ' + cfg.name + 
-          ' attempting to extend ' + cfg.extends + ' which was not found!');
-        debug('Adding module ' + cfg.name + ' extending ' + cfg.extends);
+        assert(cfg.extends in library.modules,
+          `Module ${cfg.name} attempting to extend ${cfg.extends} which was not found!`);
+        debug(`Adding module ${cfg.name} extending ${cfg.extends}`);
         library.register(library.modules[cfg.extends].extend(
           cfg.name, cfg.title, cfg.author, cfg.config));
       } else {
-        debug('Adding module ' + cfg.name + ' from ' + path.join(cfg.root, cfg.path));
+        debug(`Adding module ${cfg.name} from ${path.join(cfg.root, cfg.path)}`);
         library.register(new ModuleDef(cfg.name, cfg.root, cfg.path, cfg.title,
               cfg.author, cfg.config));
       }
@@ -93,7 +93,7 @@ class ModuleLoader {
   }
 
   loadModule(moduleConfigFile) {
-    var moduleConfig = fs.readFileSync(moduleConfigFile, 'utf8');
+    let moduleConfig = fs.readFileSync(moduleConfigFile, 'utf8');
     const root = path.dirname(moduleConfigFile);
     try {
       const cfg = RJSON.parse(moduleConfig);
