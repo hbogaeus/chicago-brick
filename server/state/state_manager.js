@@ -82,12 +82,14 @@ class StateManager {
     this.interpolatorDefs_[name] = interpolatorDef;
     this.informClient_(name, this.network_);
   }
+    
   // Makes an unshared SharedState instance for the private use of the server.  It
   // is not sent to clients.
   createPrivate(interpolatorDef) {
     return new sharedState.SharedState(
       'private', sharedState.decodeInterpolator(interpolatorDef), 'server');
   }
+    
   createSchedule(interpolatorDef, schedule) {
     return new StateSchedule(this, interpolatorDef, schedule);
   }
@@ -96,6 +98,7 @@ class StateManager {
       this.informClient_(k, socket);
     }
   }
+    
   informClient_(name, socket) {
     if (socket.id) {
       debug(`informing client ${socket.id} about state`, name);
@@ -108,6 +111,7 @@ class StateManager {
       owner: this.stateOwners_[name]
     });
   }
+    
   get(name) {
     return this.trackedState_[name];
   }
