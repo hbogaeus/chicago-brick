@@ -20,10 +20,10 @@ define((require) => {
   'use strict';
 
   function display(html, position) {
-    var container = document.getElementById('message-' + position);
+    var container = document.getElementById(`message-${position}`);
     if (!container) {
       container = document.createElement('div');
-      container.className = 'messageOverlay ' + position;
+      container.className = `messageOverlay ${position}`;
       document.body.appendChild(container);
     }
     container.innerHTML = html;
