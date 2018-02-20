@@ -17,6 +17,8 @@ limitations under the License.
  * Defines a helper function for loading the Youtube API.
  */
 define((require) => {
+  'use strict';
+  
   /** Returns a promise that resolves when the Youtube API is loaded. */
   function loadYoutubeApi() {
     return new Promise((resolve, reject) => {
