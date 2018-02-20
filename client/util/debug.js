@@ -90,8 +90,12 @@ function debug(namespace) {
     prevTime = curr;
 
     // add the `color` if not set
-    if (null == self.useColors) self.useColors = exports.useColors();
-    if (null == self.color && self.useColors) self.color = selectColor();
+    if (null == self.useColors) {
+      self.useColors = exports.useColors();
+    }
+    if (null == self.color && self.useColors) {
+      self.color = selectColor();
+    }
 
     var args = Array.prototype.slice.call(arguments);
 
@@ -106,7 +110,10 @@ function debug(namespace) {
     var index = 0;
     args[0] = args[0].replace(/%([a-z%])/g, (match, format) => {
       // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
+      if (match === '%%') {
+        return match;
+      }
+
       index++;
       var formatter = exports.formatters[format];
       if ('function' === typeof formatter) {
@@ -146,10 +153,13 @@ function enable(namespaces) {
   exports.save(namespaces);
 
   var split = (namespaces || '').split(/[\s,]+/);
-  var len = split.length;
+  let len = split.length;
 
-  for (var i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
+  for (let i = 0; i < len; i++) {
+    if (!split[i]) {
+      continue; // ignore empty strings
+    }
+
     namespaces = split[i].replace(/\*/g, '.*?');
     if (namespaces[0] === '-') {
       exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
@@ -204,15 +214,15 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":2}],2:[function(require,module,exports){
+},{"ms":2}],2:[(require, module, exports) => {
 /**
- * Helpers.
+ * Constant helpers.
  */
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
+const SECONDS = 1000;
+const MINUTES = SECONDS * 60;
+const HOURS = MINUTES * 60;
+const DAYS = HOURS * 24;
+const YEARS = DAYS * 365.25;
 
 /**
  * Parse or format the given `val`.
@@ -222,13 +232,14 @@ var y = d * 365.25;
  *  - `long` verbose formatting [false]
  *
  * @param {String|Number} val
- * @param {Object} options
+ * @param {Object=} options
  * @return {String|Number}
  * @api public
  */
-module.exports = function(val, options) {
-  options = options || {};
-  if ('string' == typeof val) return parse(val);
+module.exports = function(val, options = {}) {
+  if ('string' == typeof val) {
+    return parse(val);
+  }
   return options.long
     ? long(val)
     : short(val);
@@ -243,9 +254,15 @@ module.exports = function(val, options) {
  */
 function parse(str) {
   str = '' + str;
-  if (str.length > 10000) return;
+  if (str.length > 10000) {
+    return;
+  }
+
   var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-  if (!match) return;
+  if (!match) {
+    return;
+  }
+
   var n = parseFloat(match[1]);
   var type = (match[2] || 'ms').toLowerCase();
   switch (type) {
@@ -254,29 +271,34 @@ function parse(str) {
     case 'yrs':
     case 'yr':
     case 'y':
-      return n * y;
+      return n * YEARS;
+
     case 'days':
     case 'day':
     case 'd':
-      return n * d;
+      return n * DAYS;
+
     case 'hours':
     case 'hour':
     case 'hrs':
     case 'hr':
     case 'h':
-      return n * h;
+      return n * HOURS;
+
     case 'minutes':
     case 'minute':
     case 'mins':
     case 'min':
     case 'm':
-      return n * m;
+      return n * MINUTES;
+
     case 'seconds':
     case 'second':
     case 'secs':
     case 'sec':
     case 's':
-      return n * s;
+      return n * SECONDS;
+
     case 'milliseconds':
     case 'millisecond':
     case 'msecs':
@@ -294,10 +316,18 @@ function parse(str) {
  * @api private
  */
 function short(ms) {
-  if (ms >= d) return Math.round(ms / d) + 'd';
-  if (ms >= h) return Math.round(ms / h) + 'h';
-  if (ms >= m) return Math.round(ms / m) + 'm';
-  if (ms >= s) return Math.round(ms / s) + 's';
+  if (ms >= DAYS) {
+    return Math.round(ms / DAYS) + 'd';
+  }
+  if (ms >= HOURS) {
+    return Math.round(ms / HOURS) + 'h';
+  }
+  if (ms >= MINUTES) {
+    return Math.round(ms / MINUTES) + 'm';
+  }
+  if (ms >= SECONDS) {
+    return Math.round(ms / SECONDS) + 's';
+  }
   return ms + 'ms';
 }
 
@@ -309,10 +339,10 @@ function short(ms) {
  * @api private
  */
 function long(ms) {
-  return plural(ms, d, 'day')
-    || plural(ms, h, 'hour')
-    || plural(ms, m, 'minute')
-    || plural(ms, s, 'second')
+  return plural(ms, DAYS, 'day')
+    || plural(ms, HOURS, 'hour')
+    || plural(ms, MINUTES, 'minute')
+    || plural(ms, SECONDS, 'second')
     || ms + ' ms';
 }
 
@@ -320,12 +350,16 @@ function long(ms) {
  * Pluralization helper.
  */
 function plural(ms, n, name) {
-  if (ms < n) return;
-  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
+  if (ms < n) {
+    return;
+  }
+  if (ms < n * 1.5) {
+    return Math.floor(ms / n) + ' ' + name;
+  }
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],3:[function(require,module,exports){
+},{}],3:[(require, module, exports) => {
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -396,7 +430,9 @@ function formatArgs() {
     + (useColors ? '%c ' : ' ')
     + '+' + exports.humanize(this.diff);
 
-  if (!useColors) return args;
+  if (!useColors) {
+    return args;
+  }
 
   var c = 'color: ' + this.color;
   args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
@@ -407,7 +443,10 @@ function formatArgs() {
   var index = 0;
   var lastC = 0;
   args[0].replace(/%[a-z%]/g, (match) => {
-    if ('%%' === match) return;
+    if ('%%' === match) {
+      return;
+    }
+
     index++;
     if ('%c' === match) {
       // we only are interested in the *last* %c
@@ -447,7 +486,9 @@ function save(namespaces) {
     } else {
       exports.storage.debug = namespaces;
     }
-  } catch(e) {}
+  } catch(e) {
+    // Code should never be reached
+  }
 }
 
 /**
@@ -460,7 +501,9 @@ function load() {
   var r;
   try {
     r = exports.storage.debug;
-  } catch(e) {}
+  } catch(e) {
+    // Code should never be reached
+  }
   return r;
 }
 
@@ -472,9 +515,8 @@ exports.enable(load());
 /**
  * Localstorage attempts to return the localstorage.
  *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
+ * This is necessary because safari throws when a user disables
+ * cookies/localstorage and you attempt to access it.
  *
  * @return {LocalStorage}
  * @api private
@@ -482,7 +524,9 @@ exports.enable(load());
 function localstorage(){
   try {
     return window.localStorage;
-  } catch (e) {}
+  } catch (e) {
+    // Code should never be reached
+  }
 }
 
 },{"./debug":1}]},{},[3])(3)
