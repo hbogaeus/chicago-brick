@@ -16,22 +16,20 @@ limitations under the License.
 /**
  * Defines a helper function for loading the Youtube API.
  */
-define(function(require) {
-  'use strict';
-
+define((require) => {
   /** Returns a promise that resolves when the Youtube API is loaded. */
-  var loadYoutubeApi = function() {
-    return new Promise(function(resolve, reject) {
+  function loadYoutubeApi() {
+    return new Promise((resolve, reject) => {
       if (window.YT) {
         resolve();
       } else {
-        var apiTag = document.createElement('script');
+        let apiTag = document.createElement('script');
         apiTag.src = 'https://www.youtube.com/iframe_api';
         document.head.appendChild(apiTag);
         window.onYouTubeIframeAPIReady = resolve;
       }
     });
-  };
+  }
 
   return loadYoutubeApi;
 });
