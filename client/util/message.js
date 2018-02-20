@@ -14,11 +14,9 @@ limitations under the License.
 ==============================================================================*/
 
 // Displays messages as an on-screen overlay.
-define(function(require) {
-  'use strict';
-
+define((require) => {
   function display(html, position) {
-    var container = document.getElementById('message-' + position);
+    let container = document.getElementById('message-' + position);
     if (!container) {
       container = document.createElement('div');
       container.className = 'messageOverlay ' + position;
