@@ -13,15 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-// Displays messages as an on-screen overlay.
-define(function(require) {
+/**
+ * Displays messages as an on-screen overlay.
+ */
+define((require) => {
   'use strict';
 
   function display(html, position) {
-    var container = document.getElementById('message-' + position);
+    var container = document.getElementById(`message-${position}`);
     if (!container) {
       container = document.createElement('div');
-      container.className = 'messageOverlay ' + position;
+      container.className = `messageOverlay ${position}`;
       document.body.appendChild(container);
     }
     container.innerHTML = html;
