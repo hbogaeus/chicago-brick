@@ -18,14 +18,13 @@ limitations under the License.
  * provided by the standard debug module.
  * Recorded errors are sent to the server.
  */
-define(function(require) {
-  'use strict';
 
-  var network = require('client/network/network');
+define((require) => {
+  const network = require('client/network/network');
 
   return {
-    error: function(debug) {
-      return function(e) {
+    error: (debug) => {
+      return (e) => {
         debug(e);
         network.send('record-error', {
           message: e.message || e,
