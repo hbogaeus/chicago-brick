@@ -22,18 +22,19 @@ limitations under the License.
  * This bridges the conceptual gap between how a module author wants to think
  * about a series of states, and the need to blast a new state out on every
  * tick so that clients are all in sync.
- *
- * @param {StateManager} stateManager The server's StateManager instance.
- * @param {Object} interpolatorDefinition An interpolator as defined by
- * SharedState.
- * @param {Array<{dur: number, state}>} schedule A list of durations (in
- * milliseconds) and ending states that the object will tick through.
  */
 class StateSchedule {
+  /**
+   * @param {StateManager} stateManager The server's StateManager instance.
+   * @param {Object} interpolatorDefinition An interpolator as defined by
+   *        SharedState.
+   * @param {Array<{dur: number, state}>} schedule A list of durations (in
+   *        milliseconds) and ending states that the object will tick through.
+   */
   constructor(stateManager, interpolatorDefinition, schedule) {
     /**
      * The SharedState instance that backs the machine.
-     * @type {SharedState}
+     * @private @const {SharedState}
      */
     this.state_ = stateManager.createPrivate(interpolatorDefinition);
 
@@ -41,19 +42,19 @@ class StateSchedule {
      * The schedule.  A list of {dur:number, state:object} records, where the
      * durations are in milliseconds and the state objects conform to the
      * interpolator definition.
-     * @type {Array<{dur: number, state}>}
+     * @private @const {Array<{dur: number, state}>}
      */
     this.schedule_ = schedule;
 
     /**
      * Initialization can only complete on the first tick.
-     * @type {bool}
+     * @private @const {bool}
      */
     this.firstTick_ = true;
 
     /**
      * The index of the next item in the schedule array.
-     * @type {number}
+     * @private @const {number}
      */
     this.nextItemIndex_ = 0;
   }
@@ -73,7 +74,7 @@ class StateSchedule {
 
       /**
        * The starting time of the next item in the schedule array.
-       * @type {number}
+       * @private @const {number}
        */
       this.nextItemTime_ = time;
     }
