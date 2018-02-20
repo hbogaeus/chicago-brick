@@ -22,7 +22,6 @@ limitations under the License.
  *
  * Expose `debug()` as the module.
  */
-
 exports = module.exports = debug;
 exports.coerce = coerce;
 exports.disable = disable;
@@ -33,7 +32,6 @@ exports.humanize = require('ms');
 /**
  * The currently active debug mode names, and names to skip.
  */
-
 exports.names = [];
 exports.skips = [];
 
@@ -42,19 +40,16 @@ exports.skips = [];
  *
  * Valid key names are a single, lowercased letter, i.e. "n".
  */
-
 exports.formatters = {};
 
 /**
  * Previously assigned color.
  */
-
 var prevColor = 0;
 
 /**
  * Previous log timestamp.
  */
-
 var prevTime;
 
 /**
@@ -63,7 +58,6 @@ var prevTime;
  * @return {Number}
  * @api private
  */
-
 function selectColor() {
   return exports.colors[prevColor++ % exports.colors.length];
 }
@@ -75,7 +69,6 @@ function selectColor() {
  * @return {Function}
  * @api public
  */
-
 function debug(namespace) {
 
   // define the `disabled` version
@@ -111,7 +104,7 @@ function debug(namespace) {
 
     // apply any `formatters` transformations
     var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
+    args[0] = args[0].replace(/%([a-z%])/g, (match, format) => {
       // if we encounter an escaped % then don't increase the array index
       if (match === '%%') return match;
       index++;
@@ -149,7 +142,6 @@ function debug(namespace) {
  * @param {String} namespaces
  * @api public
  */
-
 function enable(namespaces) {
   exports.save(namespaces);
 
@@ -172,7 +164,6 @@ function enable(namespaces) {
  *
  * @api public
  */
-
 function disable() {
   exports.enable('');
 }
@@ -184,15 +175,14 @@ function disable() {
  * @return {Boolean}
  * @api public
  */
-
 function enabled(name) {
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
+  var len;
+  for (let i = 0, len = exports.skips.length; i < len; i++) {
     if (exports.skips[i].test(name)) {
       return false;
     }
   }
-  for (i = 0, len = exports.names.length; i < len; i++) {
+  for (let i = 0, len = exports.names.length; i < len; i++) {
     if (exports.names[i].test(name)) {
       return true;
     }
@@ -207,9 +197,10 @@ function enabled(name) {
  * @return {Mixed}
  * @api private
  */
-
 function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
+  if (val instanceof Error) {
+    return val.stack || val.message;
+  }
   return val;
 }
 
@@ -217,7 +208,6 @@ function coerce(val) {
 /**
  * Helpers.
  */
-
 var s = 1000;
 var m = s * 60;
 var h = m * 60;
@@ -236,8 +226,7 @@ var y = d * 365.25;
  * @return {String|Number}
  * @api public
  */
-
-module.exports = function(val, options){
+module.exports = function(val, options) {
   options = options || {};
   if ('string' == typeof val) return parse(val);
   return options.long
@@ -252,7 +241,6 @@ module.exports = function(val, options){
  * @return {Number}
  * @api private
  */
-
 function parse(str) {
   str = '' + str;
   if (str.length > 10000) return;
@@ -305,7 +293,6 @@ function parse(str) {
  * @return {String}
  * @api private
  */
-
 function short(ms) {
   if (ms >= d) return Math.round(ms / d) + 'd';
   if (ms >= h) return Math.round(ms / h) + 'h';
@@ -321,7 +308,6 @@ function short(ms) {
  * @return {String}
  * @api private
  */
-
 function long(ms) {
   return plural(ms, d, 'day')
     || plural(ms, h, 'hour')
@@ -333,7 +319,6 @@ function long(ms) {
 /**
  * Pluralization helper.
  */
-
 function plural(ms, n, name) {
   if (ms < n) return;
   if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
@@ -347,7 +332,6 @@ function plural(ms, n, name) {
  *
  * Expose `debug()` as the module.
  */
-
 exports = module.exports = require('./debug');
 exports.log = log;
 exports.formatArgs = formatArgs;
@@ -362,7 +346,6 @@ exports.storage = 'undefined' != typeof chrome
 /**
  * Colors.
  */
-
 exports.colors = [
   'lightseagreen',
   'forestgreen',
@@ -379,7 +362,6 @@ exports.colors = [
  *
  * TODO: add a `localStorage` variable to explicitly enable/disable colors
  */
-
 function useColors() {
   // is webkit? http://stackoverflow.com/a/16459606/376773
   return ('WebkitAppearance' in document.documentElement.style) ||
@@ -393,7 +375,6 @@ function useColors() {
 /**
  * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
  */
-
 exports.formatters.j = function(v) {
   return JSON.stringify(v);
 };
@@ -404,7 +385,6 @@ exports.formatters.j = function(v) {
  *
  * @api public
  */
-
 function formatArgs() {
   var args = arguments;
   var useColors = this.useColors;
@@ -426,7 +406,7 @@ function formatArgs() {
   // figure out the correct index to insert the CSS into
   var index = 0;
   var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
+  args[0].replace(/%[a-z%]/g, (match) => {
     if ('%%' === match) return;
     index++;
     if ('%c' === match) {
@@ -446,7 +426,6 @@ function formatArgs() {
  *
  * @api public
  */
-
 function log() {
   // this hackery is required for IE8/9, where
   // the `console.log` function doesn't have 'apply'
@@ -461,7 +440,6 @@ function log() {
  * @param {String} namespaces
  * @api private
  */
-
 function save(namespaces) {
   try {
     if (null == namespaces) {
@@ -478,7 +456,6 @@ function save(namespaces) {
  * @return {String} returns the previously persisted debug modes
  * @api private
  */
-
 function load() {
   var r;
   try {
@@ -490,7 +467,6 @@ function load() {
 /**
  * Enable namespaces listed in `localStorage.debug` initially.
  */
-
 exports.enable(load());
 
 /**
@@ -503,7 +479,6 @@ exports.enable(load());
  * @return {LocalStorage}
  * @api private
  */
-
 function localstorage(){
   try {
     return window.localStorage;
