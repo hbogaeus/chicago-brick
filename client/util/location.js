@@ -14,9 +14,11 @@ limitations under the License.
 ==============================================================================*/
 
 define(() => {
+  'use strict';
+  
   return location.search.substr(1).split(/&/g).reduce((obj, pair) => {
-    let bits = pair.split('=');
-    let key = bits.shift();
+    var bits = pair.split('=');
+    var key = bits.shift();
     obj[key] = decodeURIComponent(bits.join('='));
     return obj;
   }, {});
