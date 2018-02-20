@@ -13,8 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-// Displays messages as an on-screen overlay.
+/**
+ * Displays messages as an on-screen overlay.
+ */
 define((require) => {
+  'use strict';
+
   function display(html, position) {
     let container = document.getElementById('message-' + position);
     if (!container) {
