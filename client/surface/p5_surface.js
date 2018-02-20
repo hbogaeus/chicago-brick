@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-define(function(require) {
+define((require) => {
   require('p5.dom');
   const Surface = require('client/surface/surface');
   const P5 = require('p5');
@@ -24,72 +24,71 @@ define(function(require) {
   // sketchArgs will be passed along to the constructor call on providedSketchClass.
 
   class P5Surface extends Surface {
-  constructor(container, wallGeometry, providedSketchClass, startTime, sketchConstructorArgs) {
-    super(container, wallGeometry);
+    constructor(container, wallGeometry, providedSketchClass, startTime, sketchConstructorArgs) {
+      super(container, wallGeometry);
 
-    this.realPixelScalingFactors = {
-      x : this.container.offsetWidth / this.virtualRect.w,
-      y : this.container.offsetHeight / this.virtualRect.h,
-    };
-
-    this.startTime = startTime;
-    const randomSeed = this.startTime || 0;
-
-    const processing_canvas_width = this.container.offsetWidth;
-    const processing_canvas_height = this.container.offsetHeight;
-
-    const xScale = this.realPixelScalingFactors.x;
-    const yScale = this.realPixelScalingFactors.y;
-
-    const wallWidth = this.wallRect.w;
-    const wallHeight = this.wallRect.h;
-
-    const xOffset = this.virtualRect.x;
-    const yOffset = this.virtualRect.y;
-
-    this.sketch = null;
-
-    const surface = this;
-
-    // p5 must be a P5.js instance.  new P5(...) below takes care of this.
-    const scaffolding = function(p5) {
-      surface.sketch = new providedSketchClass(p5, surface, sketchConstructorArgs);
-
-      p5.wallWidth = wallWidth;
-      p5.wallHeight = wallHeight;
-
-      p5.preload = function() {
-        if (typeof(surface.sketch.preload) == "function") {
-          surface.sketch.preload(p5);
-        }
+      this.realPixelScalingFactors = {
+        x : this.container.offsetWidth / this.virtualRect.w,
+        y : this.container.offsetHeight / this.virtualRect.h,
       };
 
-      p5.setup = function() {
-        // Videowall required setup.
-        p5.createCanvas(processing_canvas_width, processing_canvas_height, p5.webgl);
-        p5.scale(xScale, yScale);
-        p5.noLoop();
-        p5.translate(-xOffset, -yOffset);
-        p5.randomSeed(randomSeed);
+      this.startTime = startTime;
+      const randomSeed = this.startTime || 0;
 
-        surface.sketch.setup(p5);
+      const processing_canvas_width = this.container.offsetWidth;
+      const processing_canvas_height = this.container.offsetHeight;
+
+      const xScale = this.realPixelScalingFactors.x;
+      const yScale = this.realPixelScalingFactors.y;
+
+      const wallWidth = this.wallRect.w;
+      const wallHeight = this.wallRect.h;
+
+      const xOffset = this.virtualRect.x;
+      const yOffset = this.virtualRect.y;
+
+      this.sketch = null;
+
+      const surface = this;
+
+      // p5 must be a P5.js instance.  new P5(...) below takes care of this.
+      const scaffolding = (p5) => {
+        surface.sketch = new providedSketchClass(p5, surface, sketchConstructorArgs);
+
+        p5.wallWidth = wallWidth;
+        p5.wallHeight = wallHeight;
+
+        p5.preload = () => {
+          if (typeof(surface.sketch.preload) == "function") {
+            surface.sketch.preload(p5);
+          }
+        };
+
+        p5.setup = () => {
+          // Videowall required setup.
+          p5.createCanvas(processing_canvas_width, processing_canvas_height, p5.webgl);
+          p5.scale(xScale, yScale);
+          p5.noLoop();
+          p5.translate(-xOffset, -yOffset);
+          p5.randomSeed(randomSeed);
+
+          surface.sketch.setup(p5);
+        };
+
+        p5.draw = surface.sketch.draw.bind(surface.sketch);
+
+        p5.frameRate(60);
       };
 
-      p5.draw = surface.sketch.draw.bind(surface.sketch);
+      this.p5 = new P5(scaffolding, container);
+    }
 
-      p5.frameRate(60);
-    };
-
-    this.p5 = new P5(scaffolding, container);
-  }
-
-
-  destroy() {
-    if (this.p5) {
-      this.p5.remove();
+    destroy() {
+      if (this.p5) {
+        this.p5.remove();
+      }
     }
   }
-}
 
   return P5Surface;
 });
