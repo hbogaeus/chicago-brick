@@ -38,14 +38,14 @@ network.on('new-client', (info) => {
 
 let enabled = false;
 module.exports = {
-  isEnabled() {
+  isEnabled: () => {
     return enabled;
   },
-  enable() {
+  enable: () => {
     enabled = true;
     monitoringSockets.forEach(sendCurrentState);
   },
-  update(change) {
+  update: (change) => {
     if (enabled) {
       Object.assign(currentStatus, change);
       monitoringSockets.forEach(socket => socket.emit('monitor', change));
